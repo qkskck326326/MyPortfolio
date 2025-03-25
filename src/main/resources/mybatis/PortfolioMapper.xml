@@ -1,6 +1,63 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="co.kr.myportfolio.mapper.PortfolioMapper">
 
-</beans>
+    <!--포트폴리오 저장-->
+    <insert id="insertPortfolio" parameterType="Portfolio" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO Portfolio (user_pid, user_nickname, thumbnail, title, content, created_at, updated_at)
+        VALUES (#{userPid}, #{userNickname}, #{thumbnail}, #{title}, #{content}, NOW(), NOW());
+    </insert>
+
+    <!--테그 저장-->
+    <insert id="insertTags" parameterType="map">
+        INSERT INTO Portfolio_Tags (portfolio_id, tag)
+        VALUES
+        <foreach collection="tags" item="tag" separator=",">
+            (#{portfolioId}, #{tag})
+        </foreach>
+    </insert>
+
+    <!--포트폴리오 및 테그 반환을 위한 매핑-->
+    <resultMap id="PortfolioResultMap" type="PortfolioResponseDTO">
+        <!-- DTO 자체의 ID 지정 (중복 판단 기준) -->
+        <id property="id" column="portfolio_id"/>
+        <!-- 포트폴리오 객체 매핑 -->
+        <association property="portfolio" javaType="Portfolio">
+            <id property="id" column="portfolio_id"/>
+            <result property="userPid" column="user_pid"/>
+            <result property="likeCount" column="like_count"/>
+            <result property="userNickname" column="user_nickname"/>
+            <result property="thumbnail" column="thumbnail"/>
+            <result property="title" column="title"/>
+            <result property="content" column="content"/>
+            <result property="createdAt" column="created_at"/>
+            <result property="updatedAt" column="updated_at"/>
+        </association>
+
+        <!-- 태그 리스트 매핑 -->
+        <collection property="tags" ofType="String">
+            <result column="tag"/>
+        </collection>
+    </resultMap>
+
+    <!--특정 포트폴리오 및 테그 반환-->
+    <select id="getPortfolioAndTag" resultMap="PortfolioResultMap">
+        SELECT
+            p.id AS portfolio_id,
+            p.user_pid,
+            p.user_nickname,
+            p.thumbnail,
+            p.title,
+            p.content,
+            p.created_at,
+            p.updated_at,
+            pt.tag
+        FROM Portfolio p
+                 LEFT JOIN Portfolio_Tags pt ON p.id = pt.portfolio_id
+        WHERE p.id = #{portfolioId}
+    </select>
+
+
+
+</mapper>

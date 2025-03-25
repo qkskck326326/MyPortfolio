@@ -1,4 +1,4 @@
-package co.kr.myportfolio.model;
+package co.kr.myportfolio.vo;
 
 
 import lombok.*;
@@ -11,7 +11,7 @@ import java.util.Date;
 @AllArgsConstructor
 @ToString
 public class User {
-    private int id;
+    private int userPid;
     private String userId;
     private String password;
     private String nickname;

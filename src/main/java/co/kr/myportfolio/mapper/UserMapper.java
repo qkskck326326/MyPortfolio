@@ -1,7 +1,7 @@
-package co.kr.myportfolio.dao;
+package co.kr.myportfolio.mapper;
 
 
-import co.kr.myportfolio.model.User;
+import co.kr.myportfolio.vo.User;
 import org.apache.ibatis.annotations.*;
 
 @Mapper
@@ -16,7 +16,7 @@ public interface UserMapper {
     // UserId로 유저 찾기
     User getUserByUserId(String userId);
     
-    // 닉네임 체크
+    // 닉네임 중복 체크
     boolean checkNicknameExists(String nickname);
     
     // 유저 정보 업데이트
@@ -24,4 +24,7 @@ public interface UserMapper {
     
     // 유저 삭제
     void deleteUser(int id);
+    
+    // 아이디 중복 체크
+    boolean checkUserIdExists(String nickname);
 }
