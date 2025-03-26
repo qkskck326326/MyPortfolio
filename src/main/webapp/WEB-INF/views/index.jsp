@@ -1,25 +1,155 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <!DOCTYPE html>
-<script src="${pageContext.request.contextPath}/resources/js/jquery-3.6.0.js"></script>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
     <title>MyPortfolio</title>
+    <script src="${pageContext.request.contextPath}/resources/js/jquery-3.6.0.js"></script>
+    <style>
+        .card-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            box-sizing: border-box;
+        }
+
+        .card {
+            width: calc((100% - 60px) / 4); /* gap 20px * (4 - 1) */
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            font-family: sans-serif;
+            background: #fff;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .thumbnail {
+            width: 100%;
+            aspect-ratio: 4 / 3; /* ✅ 비율 유지하면서 이미지 박스 만듦 */
+            overflow: hidden;
+        }
+
+        .thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* ✅ 꽉 채우되 비율 유지 */
+            display: block;
+        }
+
+        .content {
+            flex: 1;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+
+        .title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 4px;
+            text-align: left;
+        }
+
+        .date {
+            font-size: 0.85rem;
+            color: gray;
+            text-align: left;
+        }
+
+        .bottom {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+
+        .nickname {
+            font-weight: 500;
+        }
+
+        .like {
+            color: #e74c3c;
+        }
+    </style>
 </head>
 <body>
 <jsp:include page="/WEB-INF/views/common/header.jsp" />
-<h1>${message}</h1>
-<c:choose>
-    <c:when test="${not empty sessionScope.user_nickname}">
-        <p>안녕하세요, <strong>${sessionScope.user_nickname}</strong>님!</p>
-        <button id="logoutBtn">로그아웃</button>
-    </c:when>
-    <c:otherwise>
-        <p><a href="${pageContext.request.contextPath}/login">로그인</a>이 필요합니다.</p>
-    </c:otherwise>
-</c:choose>
-<p><a href="${pageContext.request.contextPath}/user/register">회원가입</a>이 필요합니다.</p>
-<a href="portfolio/new">포트폴리오 작성</a>
+
+<div id="cardContainer" class="card-container"></div>
+
 </body>
+
+<script>
+    $(document).on('click', '.nickname', function (e) {
+        e.preventDefault();     // 링크 이동 방지
+        e.stopPropagation();    // 부모 <a> 클릭 방지
+        const nickname = $(this).data('user');
+
+        console.log(`작성자 클릭: \${nickname}`);
+        // 예시: location.href = `${pageContext.request.contextPath}/user/\${nickname}`;
+    });
+
+    $(document).ready(function () {
+        $.ajax({
+            url: '${pageContext.request.contextPath}/portfolio/get',
+            method: 'GET',
+            dataType: 'json',
+            success: function (res) {
+                const cardList = res.portfolioCardList;
+                const $container = $('#cardContainer');
+                $container.empty();
+
+                cardList.forEach(card => {
+                    const createdAt = formatDate(card.createdAt);
+                    const defaultThumbnail = '${pageContext.request.contextPath}/resources/images/logo.webp';
+                    const thumbnail = card.thumbnail ? card.thumbnail : defaultThumbnail;
+
+                    const html = `
+                        <a href="${pageContext.request.contextPath}/portfolio/\${card.portfolioId}" class="card" style="text-decoration: none; color: inherit;">
+                            <div class="thumbnail">
+                                <img src="\${thumbnail}" alt="썸네일">
+                            </div>
+                            <div class="content">
+                                <div class="title">\${card.portfolioTitle}</div>
+                                <div class="date">\${createdAt}</div>
+                                <hr>
+                                <div class="bottom">
+                                    <span class="nickname" data-user="\${card.userNickname}">작성자. \${card.userNickname}</span>
+                                    <span class="like">❤️ \${card.like_count}</span>
+                                </div>
+                            </div>
+                        </a>
+                    `;
+                    $container.append(html);
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error("카드 리스트 불러오기 실패:", error);
+            }
+        });
+
+        function formatDate(arr) {
+            const [year, month, day, hour, min] = arr;
+            return `\${year}-\${pad(month)}-\${pad(day)} \${pad(hour)}:\${pad(min)}`;
+        }
+
+        function pad(n) {
+            return n < 10 ? '0' + n : n;
+        }
+
+    });
+</script>
+
+
 </html>
