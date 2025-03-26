@@ -140,6 +140,13 @@
                 <div class="user-info d-flex align-items-center bg-light p-2 rounded">
                     <i class="bi bi-person-circle fs-4 text-primary me-2"></i>
                     <span class="fw-bold text-primary me-3">${sessionScope.user_nickname} 님</span>
+
+                    <!-- 작성 버튼 -->
+                    <button class="btn btn-success fw-bold px-3 py-2"
+                            onclick="location.href='${pageContext.request.contextPath}/portfolio/new'">
+                        <i class="bi bi-pencil-square me-1"></i> 프로젝트 작성
+                    </button>
+
                     <button id="logoutBtn" class="btn btn-danger px-3 py-2 d-flex align-items-center">
                         <i class="bi bi-box-arrow-right me-1"></i> 로그아웃
                     </button>
