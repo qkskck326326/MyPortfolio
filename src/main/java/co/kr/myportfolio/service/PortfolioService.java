@@ -1,5 +1,6 @@
 package co.kr.myportfolio.service;
 
+import co.kr.myportfolio.dto.PortfolioCardDTO;
 import co.kr.myportfolio.dto.PortfolioRequestDTO;
 import co.kr.myportfolio.dto.PortfolioResponseDTO;
 import co.kr.myportfolio.mapper.PortfolioMapper;
@@ -45,11 +46,10 @@ public class PortfolioService {
     // 특정 포트폴리오 정보 불러오기
     public PortfolioResponseDTO getPortfolio(int portfolioId) {
         List<PortfolioResponseDTO> list = portfolioMapper.getPortfolioAndTag(portfolioId);
-        System.out.println("결과 개수: " + list.size());
-        for (PortfolioResponseDTO dto : list) {
-            System.out.println("userNickname = " + dto.getPortfolio().getUserNickname());
-            System.out.println("태그들: " + dto.getTags());
-        }
         return list.isEmpty() ? null : list.get(0);
+    }
+
+    public List<PortfolioCardDTO> getPortfolioCardList() {
+        return portfolioMapper.getPortfolioCardList();
     }
 }

@@ -1,5 +1,6 @@
 package co.kr.myportfolio.controller;
 
+import co.kr.myportfolio.dto.PortfolioCardDTO;
 import co.kr.myportfolio.dto.PortfolioRequestDTO;
 import co.kr.myportfolio.dto.PortfolioResponseDTO;
 import co.kr.myportfolio.service.PortfolioService;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Controller
@@ -59,8 +61,20 @@ public class PortfolioController {
         System.out.println("반환 직전");
         return ResponseEntity.ok(response); // JSON 형태로 응답
     }
-    
-    // 포트폴리오 보기 페이지 이동
+
+    // 포트폴리오 카드 리스트 조회
+    @GetMapping("/get")
+    public ResponseEntity<?> getPortfolioList(){
+        List<PortfolioCardDTO> PortfolioCardList = portfolioService.getPortfolioCardList();
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("portfolioCardList", PortfolioCardList);
+        response.put("message", "프로젝트 카드 리스트 불러옴");
+
+        return ResponseEntity.ok(response);
+    }
+
+    // 포트폴리오 보기 페이지 이동 ( 상세 )
     @GetMapping("/{portfolioId}")
     public String portfolioDetail(@PathVariable int portfolioId, Model model) {
         PortfolioResponseDTO portfolioResponseDTO = portfolioService.getPortfolio(portfolioId);
