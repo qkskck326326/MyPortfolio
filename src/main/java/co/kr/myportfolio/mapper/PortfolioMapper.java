@@ -14,7 +14,18 @@ public interface PortfolioMapper {
     void insertPortfolio(Portfolio portfolio);
     void insertTags(Map<String, Object> param);
 
-    List<PortfolioResponseDTO> getPortfolioAndTag(@Param("portfolioId") int portfolioId);
+    PortfolioResponseDTO getPortfolioAndTag(@Param("portfolioId") int portfolioId, @Param("userPid") int userPid);
 
     List<PortfolioCardDTO> getPortfolioCardList();
+
+    boolean checkUserLike(@Param("userPid") int userPid, @Param("portfolioId") int portfolioId);
+
+    void insertLike(@Param("userPid") int userPid, @Param("portfolioId") int portfolioId);
+
+    void incrementLikeCount(@Param("portfolioId") int portfolioId);
+
+
+    void deleteLike(@Param("userPid") int userPid, @Param("portfolioId") int portfolioId);
+
+    void decrementLikeCount(@Param("portfolioId") int portfolioId);
 }

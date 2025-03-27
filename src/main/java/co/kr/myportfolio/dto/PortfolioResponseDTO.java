@@ -10,5 +10,6 @@ import java.util.List;
 public class PortfolioResponseDTO {
     private int id;
     private Portfolio portfolio;
+    private boolean is_like;
     private List<String> tags;
 }

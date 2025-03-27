@@ -7,6 +7,7 @@ import co.kr.myportfolio.mapper.PortfolioMapper;
 import co.kr.myportfolio.vo.Portfolio;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.List;
@@ -44,12 +45,30 @@ public class PortfolioService {
     }
     
     // 특정 포트폴리오 정보 불러오기
-    public PortfolioResponseDTO getPortfolio(int portfolioId) {
-        List<PortfolioResponseDTO> list = portfolioMapper.getPortfolioAndTag(portfolioId);
-        return list.isEmpty() ? null : list.get(0);
+    public PortfolioResponseDTO getPortfolio(int portfolioId, int userPid) {
+        return portfolioMapper.getPortfolioAndTag(portfolioId, userPid);
     }
 
     public List<PortfolioCardDTO> getPortfolioCardList() {
         return portfolioMapper.getPortfolioCardList();
     }
+
+
+    @Transactional
+    public boolean togglePortfolioLike(int userPid, int portfolioId) {
+        boolean alreadyLiked = portfolioMapper.checkUserLike(userPid, portfolioId);
+
+        if (alreadyLiked) {
+            // 상태가 true → 취소 로직
+            portfolioMapper.deleteLike(userPid, portfolioId);
+            portfolioMapper.decrementLikeCount(portfolioId);
+            return false; // 좋아요 취소됨
+        } else {
+            // 상태가 false → 좋아요 등록
+            portfolioMapper.insertLike(userPid, portfolioId);
+            portfolioMapper.incrementLikeCount(portfolioId);
+            return true; // 좋아요 완료됨
+        }
+    }
+
 }

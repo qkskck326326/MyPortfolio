@@ -5,6 +5,7 @@ import co.kr.myportfolio.dto.PortfolioRequestDTO;
 import co.kr.myportfolio.dto.PortfolioResponseDTO;
 import co.kr.myportfolio.service.PortfolioService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -76,15 +77,47 @@ public class PortfolioController {
 
     // 포트폴리오 보기 페이지 이동 ( 상세 )
     @GetMapping("/{portfolioId}")
-    public String portfolioDetail(@PathVariable int portfolioId, Model model) {
-        PortfolioResponseDTO portfolioResponseDTO = portfolioService.getPortfolio(portfolioId);
+    public String portfolioDetail(@PathVariable int portfolioId, Model model, HttpSession session) {
+        Integer userPidObj = (Integer) session.getAttribute("user_pid");
+        int userPid = (userPidObj != null) ? userPidObj : 0; // 기본값 0 (비회원)
+
+        PortfolioResponseDTO portfolioResponseDTO = portfolioService.getPortfolio(portfolioId, userPid);
 
         model.addAttribute("portfolio", portfolioResponseDTO.getPortfolio());
         model.addAttribute("portfolioTags", portfolioResponseDTO.getTags());
+        if(userPid != 0) { // 회원이라면
+            model.addAttribute("is_like", portfolioResponseDTO.is_like());
+        }else {
+            model.addAttribute("is_like", false);
+        }
 
         return "portfolioDetail";
     }
 
+    // 포트폴리오 좋아요 표시
+    @PostMapping("/{portfolioId}/like")
+    @ResponseBody
+    public ResponseEntity<?> likePortfolio(@PathVariable int portfolioId, HttpSession session) {
+        // 세션에서 로그인된 사용자 ID 가져오기
+        Integer userPidObj = (Integer) session.getAttribute("user_pid");
+
+        // 로그인 안 되어 있으면 401 반환
+        if (userPidObj == null) {
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("message", "로그인이 필요합니다."));
+        }
+
+        int userPid = userPidObj;
+
+        // 좋아요 상태 토글
+        boolean liked = portfolioService.togglePortfolioLike(userPid, portfolioId);
+
+        return ResponseEntity.ok(Map.of(
+                "liked", liked,
+                "message", liked ? "좋아요 완료" : "좋아요 취소"
+        ));
+    }
 
 
 }

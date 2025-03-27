@@ -2,7 +2,10 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <html>
 <head>
-    <title>포트폴리오 상세</title>
+    <%--아이콘 라이브러리--%>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+    <title>프로젝트 상세</title>
 
     <!-- Toast UI Editor Viewer CSS & JS -->
     <link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css" />
@@ -37,6 +40,32 @@
             color: #1d4ed8;
             cursor: pointer;
         }
+        .floating-nav {
+            position: fixed;
+            top: 40%;
+            right: 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            z-index: 999;
+        }
+
+        .floating-nav button {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: none;
+            background-color: #1d4ed8;
+            color: white;
+            font-size: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .floating-nav button:hover {
+            background-color: #2563eb;
+        }
     </style>
 </head>
 <body>
@@ -52,13 +81,71 @@
 
     <div id="viewer" class="markdown-viewer"></div>
 
+    <div class="floating-nav">
+        <c:choose>
+            <c:when test="${is_like}">
+                <button id="likeBtn" title="좋아요" style="background-color: #ef4444;">
+                    <i class="fas fa-thumbs-up"></i>
+                </button>
+            </c:when>
+            <c:otherwise>
+                <button id="likeBtn" title="좋아요" style="background-color: #1d4ed8;">
+                    <i class="far fa-thumbs-up"></i>
+                </button>
+            </c:otherwise>
+        </c:choose>
+        <button title="복사">
+            <i class="fas fa-copy"></i>
+        </button>
+    </div>
+
     <script>
+        const userPid = "${sessionScope.user_pid}";
+        const portfolioId = "${portfolio.id}";
         const markdownContent = `<c:out value='${portfolio.content}' escapeXml="true"/>`;
 
         const viewer = new toastui.Editor.factory({
             el: document.querySelector('#viewer'),
             viewer: true,
             initialValue: markdownContent
+        });
+
+        // 초기 좋아요 상태를 저장 (JSP에서 Boolean -> JS Boolean)
+        let isLiked = ${is_like ? 'true' : 'false'};
+
+        document.getElementById("likeBtn").addEventListener("click", function () {
+            if (!userPid) {
+                alert("로그인이 필요합니다.");
+                return;
+            }
+
+            fetch(`${pageContext.request.contextPath}/portfolio/${portfolioId}/like`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ userId: parseInt(userPid) })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    const btn = document.getElementById("likeBtn");
+                    const icon = btn.querySelector("i");
+
+                    if (data.liked) {
+                        // 좋아요 상태로 UI 변경
+                        btn.style.backgroundColor = "#ef4444";
+                        icon.className = "fas fa-thumbs-up";
+                    } else {
+                        // 좋아요 취소 상태로 UI 변경
+                        btn.style.backgroundColor = "#1d4ed8";
+                        icon.className = "far fa-thumbs-up";
+                    }
+
+                    // 상태 갱신
+                    isLiked = data.liked;
+                })
+                .catch(err => {
+                    console.error("좋아요 처리 중 오류 발생:", err);
+                    alert("좋아요 처리 중 오류가 발생했습니다.");
+                });
         });
     </script>
 </div>

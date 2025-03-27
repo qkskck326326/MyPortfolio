@@ -22,6 +22,10 @@
     <resultMap id="PortfolioResultMap" type="PortfolioResponseDTO">
         <!-- DTO 자체의 ID 지정 (중복 판단 기준) -->
         <id property="id" column="portfolio_id"/>
+
+        <!-- 좋아요 여부 -->
+        <result property="is_like" column="is_like"/>
+
         <!-- 포트폴리오 객체 매핑 -->
         <association property="portfolio" javaType="Portfolio">
             <id property="id" column="portfolio_id"/>
@@ -44,6 +48,7 @@
     <!--특정 포트폴리오 및 테그 반환-->
     <select id="getPortfolioAndTag" resultMap="PortfolioResultMap">
         SELECT
+            p.id AS id,
             p.id AS portfolio_id,
             p.user_pid,
             p.user_nickname,
@@ -52,9 +57,12 @@
             p.content,
             p.created_at,
             p.updated_at,
-            pt.tag
+            pt.tag,
+            IF(upl.user_pid IS NULL, FALSE, TRUE) AS is_like
         FROM Portfolio p
                  LEFT JOIN Portfolio_Tags pt ON p.id = pt.portfolio_id
+                 LEFT JOIN User_Portfolio_Like upl
+                           ON upl.portfolio_id = p.id AND upl.user_pid = #{userPid}
         WHERE p.id = #{portfolioId}
     </select>
 
@@ -73,5 +81,40 @@
         ORDER BY
             p.created_at DESC
     </select>
+
+    <!-- 좋아요 여부 확인 -->
+    <select id="checkUserLike" resultType="boolean">
+        SELECT EXISTS (
+            SELECT 1
+            FROM User_Portfolio_Like
+            WHERE user_pid = #{userPid} AND portfolio_id = #{portfolioId}
+        )
+    </select>
+
+    <!--좋아요 표시-->
+    <insert id="insertLike">
+        INSERT INTO User_Portfolio_Like (user_pid, portfolio_id)
+        VALUES (#{userPid}, #{portfolioId});
+    </insert>
+
+    <!--좋아요 수 증가-->
+    <update id="incrementLikeCount">
+        UPDATE Portfolio
+        SET like_count = IFNULL(like_count, 0) + 1
+        WHERE id = #{portfolioId};
+    </update>
+
+    <!-- 좋아요 삭제 -->
+    <delete id="deleteLike">
+        DELETE FROM User_Portfolio_Like
+        WHERE user_pid = #{userPid} AND portfolio_id = #{portfolioId}
+    </delete>
+
+    <!-- 좋아요 수 감소 (0 이하로는 떨어지지 않도록 처리) -->
+    <update id="decrementLikeCount">
+        UPDATE Portfolio
+        SET like_count = IF(like_count > 0, like_count - 1, 0)
+        WHERE id = #{portfolioId}
+    </update>
 
 </mapper>
