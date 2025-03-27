@@ -30,18 +30,26 @@
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
+            transition: all 0.5s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+            cursor: pointer;
         }
 
         .thumbnail {
             width: 100%;
-            aspect-ratio: 4 / 3; /* ✅ 비율 유지하면서 이미지 박스 만듦 */
+            aspect-ratio: 4 / 3;
             overflow: hidden;
         }
 
         .thumbnail img {
             width: 100%;
             height: 100%;
-            object-fit: cover; /* ✅ 꽉 채우되 비율 유지 */
+            object-fit: cover;
             display: block;
         }
 
@@ -91,6 +99,7 @@
 </body>
 
 <script>
+    // 수정 - 닉네임 클릭시
     $(document).on('click', '.nickname', function (e) {
         e.preventDefault();     // 링크 이동 방지
         e.stopPropagation();    // 부모 <a> 클릭 방지
@@ -100,6 +109,7 @@
         // 예시: location.href = `${pageContext.request.contextPath}/user/\${nickname}`;
     });
 
+    // 수정 - 데이터 로딩 갯수 및 조건
     $(document).ready(function () {
         $.ajax({
             url: '${pageContext.request.contextPath}/portfolio/get',
