@@ -1,4 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<script src="${pageContext.request.contextPath}/resources/js/jquery-3.6.0.js"></script>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <!-- Bootstrap CSS -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -146,7 +147,7 @@
                             onclick="location.href='${pageContext.request.contextPath}/portfolio/new'">
                         <i class="bi bi-pencil-square me-1"></i> 프로젝트 작성
                     </button>
-
+                    &nbsp;
                     <button id="logoutBtn" class="btn btn-danger px-3 py-2 d-flex align-items-center">
                         <i class="bi bi-box-arrow-right me-1"></i> 로그아웃
                     </button>
