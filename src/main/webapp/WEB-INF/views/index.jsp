@@ -136,7 +136,7 @@
                                 <hr>
                                 <div class="bottom">
                                     <span class="nickname" data-user="\${card.userNickname}">작성자. \${card.userNickname}</span>
-                                    <span class="like">❤️ \${card.like_count}</span>
+                                    <span class="like">❤️ \${card.likeCount}</span>
                                 </div>
                             </div>
                         </a>

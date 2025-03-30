@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 public class PortfolioCardDTO {
     private int portfolioId;
     private int userPid;
-    private int like_count;
+    private int likeCount;
     private String thumbnail;
     private String portfolioTitle;
     private String userNickname;
