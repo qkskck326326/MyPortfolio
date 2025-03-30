@@ -12,9 +12,23 @@
     <script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
 
     <style>
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background-color: #f9fafb;
+            color: #1f2937;
+            margin: 0;
+            padding: 0;
+            min-width: 1280px; /* 최소 너비 제한 */
+        }
+
         .portfolio-container {
-            width: 80%;
-            margin: 0 auto;
+            width: 100%;
+            max-width: 1200px; /* 기존 960px → 1200px 로 확장 */
+            margin: 40px auto;
+            background: #fff;
+            padding: 40px 60px; /* 좌우 여백도 조금 넉넉하게 */
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
         }
 
         .markdown-viewer {
@@ -74,12 +88,14 @@
     <h1>${portfolio.title}</h1>
     <p>작성자 : ${portfolio.userNickname}</p>
     <p>작성일: ${portfolio.createdAt}</p>
-
+    <p>[ 기술테그 ]</p>
     <c:forEach var="tag" items="${portfolioTags}">
         <span class="tag-badge">${tag}</span>
     </c:forEach>
 
     <div id="viewer" class="markdown-viewer"></div>
+    <textarea id="markdown-content" style="display:none;"><c:out value="${portfolio.content}" /></textarea>
+
 
     <div class="floating-nav">
         <c:choose>
@@ -102,7 +118,8 @@
     <script>
         const userPid = "${sessionScope.user_pid}";
         const portfolioId = "${portfolio.id}";
-        const markdownContent = `<c:out value='${portfolio.content}' escapeXml="true"/>`;
+        <%--const markdownContent = `<c:out value='${portfolio.content}' escapeXml="true"/>`;--%>
+        const markdownContent = document.getElementById("markdown-content").value;
 
         const viewer = new toastui.Editor.factory({
             el: document.querySelector('#viewer'),
