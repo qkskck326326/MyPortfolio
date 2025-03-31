@@ -82,6 +82,29 @@
             p.created_at DESC
     </select>
 
+    <!--무한스크롤 - 카드 리스트 반환 + 정렬기준-->
+    <select id="getPortfolioCardListWithSortBy" parameterType="map" resultType="PortfolioCardDTO">
+        SELECT
+        p.id AS portfolioId,
+        p.user_pid AS userPid,
+        p.like_count AS likeCount,
+        p.thumbnail AS thumbnail,
+        p.title AS portfolioTitle,
+        p.user_nickname AS userNickname,
+        p.created_at AS createdAt
+        FROM Portfolio p
+        ORDER BY
+        <choose>
+            <when test="orderBy == 'popular'">
+                p.like_count DESC
+            </when>
+            <otherwise>
+                p.created_at DESC
+            </otherwise>
+        </choose>
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
     <!-- 좋아요 여부 확인 -->
     <select id="checkUserLike" resultType="boolean">
         SELECT EXISTS (

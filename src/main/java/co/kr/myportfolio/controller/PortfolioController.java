@@ -63,13 +63,35 @@ public class PortfolioController {
         return ResponseEntity.ok(response); // JSON 형태로 응답
     }
 
-    // 포트폴리오 카드 리스트 조회
+    // 포트폴리오 카드 리스트 조회 -- 수정이나 주석처리 필요
     @GetMapping("/get")
     public ResponseEntity<?> getPortfolioList(){
-        List<PortfolioCardDTO> PortfolioCardList = portfolioService.getPortfolioCardList();
+        List<PortfolioCardDTO> portfolioCardList = portfolioService.getPortfolioCardList();
 
         Map<String, Object> response = new HashMap<>();
-        response.put("portfolioCardList", PortfolioCardList);
+        response.put("portfolioCardList", portfolioCardList);
+        response.put("message", "프로젝트 카드 리스트 불러옴");
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/list")
+    @ResponseBody
+    public ResponseEntity<?> getPortfoliosWithPaging(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "latest") String orderBy
+    ) {
+        int offset = page * size;
+        Map<String, Object> params = new HashMap<>();
+        params.put("offset", offset);
+        params.put("limit", size);
+        params.put("orderBy", orderBy);
+
+        List<PortfolioCardDTO> portfolioCardList = portfolioService.getPortfolioCardListWithSortBy(params);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("portfolioCardList", portfolioCardList);
         response.put("message", "프로젝트 카드 리스트 불러옴");
 
         return ResponseEntity.ok(response);

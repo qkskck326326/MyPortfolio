@@ -28,4 +28,6 @@ public interface PortfolioMapper {
     void deleteLike(@Param("userPid") int userPid, @Param("portfolioId") int portfolioId);
 
     void decrementLikeCount(@Param("portfolioId") int portfolioId);
+
+    List<PortfolioCardDTO> getPortfolioCardListWithSortBy(Map<String, Object> params);
 }
