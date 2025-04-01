@@ -82,6 +82,11 @@
             p.created_at DESC
     </select>
 
+    <!--포트폴리오 전체 갯수 반환-->
+    <select id="getPortfolioTotalCount" resultType="int">
+        SELECT COUNT(*) FROM Portfolio
+    </select>
+
     <!--무한스크롤 - 카드 리스트 반환 + 정렬기준-->
     <select id="getPortfolioCardListWithSortBy" parameterType="map" resultType="PortfolioCardDTO">
         SELECT

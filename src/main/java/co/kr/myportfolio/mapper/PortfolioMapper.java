@@ -30,4 +30,6 @@ public interface PortfolioMapper {
     void decrementLikeCount(@Param("portfolioId") int portfolioId);
 
     List<PortfolioCardDTO> getPortfolioCardListWithSortBy(Map<String, Object> params);
+
+    int getPortfolioTotalCount();
 }

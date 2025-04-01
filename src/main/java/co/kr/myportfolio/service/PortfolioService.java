@@ -74,4 +74,6 @@ public class PortfolioService {
     public List<PortfolioCardDTO> getPortfolioCardListWithSortBy(Map<String, Object> params) {
         return portfolioMapper.getPortfolioCardListWithSortBy(params);
     }
+
+    public int getPortfolioTotalCount() { return portfolioMapper.getPortfolioTotalCount();}
 }

@@ -89,6 +89,9 @@
         .like {
             color: #e74c3c;
         }
+        .hidden {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -96,74 +99,18 @@
 
 <div id="cardContainer" class="card-container"></div>
 
+<p id="end-message" class="hidden" style="text-align:center; color:gray; margin: 40px 0;">
+    🔚 더 이상 불러올 포트폴리오가 없습니다.
+</p>
+
 </body>
 
-<%--<script>
-    // 수정 - 닉네임 클릭시
-    $(document).on('click', '.nickname', function (e) {
-        e.preventDefault();     // 링크 이동 방지
-        e.stopPropagation();    // 부모 <a> 클릭 방지
-        const nickname = $(this).data('user');
-
-        console.log(`작성자 클릭: \${nickname}`);
-        // 예시: location.href = `${pageContext.request.contextPath}/user/\${nickname}`;
-    });
-
-    // 수정 - 데이터 로딩 갯수 및 조건
-    $(document).ready(function () {
-        $.ajax({
-            url: '${pageContext.request.contextPath}/portfolio/get',
-            method: 'GET',
-            dataType: 'json',
-            success: function (res) {
-                const cardList = res.portfolioCardList;
-                const $container = $('#cardContainer');
-                $container.empty();
-
-                cardList.forEach(card => {
-                    const createdAt = formatDate(card.createdAt);
-                    const defaultThumbnail = '${pageContext.request.contextPath}/resources/images/logo.webp';
-                    const thumbnail = card.thumbnail ? card.thumbnail : defaultThumbnail;
-
-                    const html = `
-                        <a href="${pageContext.request.contextPath}/portfolio/\${card.portfolioId}" class="card" style="text-decoration: none; color: inherit;">
-                            <div class="thumbnail">
-                                <img src="\${thumbnail}" alt="썸네일">
-                            </div>
-                            <div class="content">
-                                <div class="title">\${card.portfolioTitle}</div>
-                                <div class="date">\${createdAt}</div>
-                                <hr>
-                                <div class="bottom">
-                                    <span class="nickname" data-user="\${card.userNickname}">작성자. \${card.userNickname}</span>
-                                    <span class="like">❤️ \${card.likeCount}</span>
-                                </div>
-                            </div>
-                        </a>
-                    `;
-                    $container.append(html);
-                });
-            },
-            error: function (xhr, status, error) {
-                console.error("카드 리스트 불러오기 실패:", error);
-            }
-        });
-
-        function formatDate(arr) {
-            const [year, month, day, hour, min] = arr;
-            return `\${year}-\${pad(month)}-\${pad(day)} \${pad(hour)}:\${pad(min)}`;
-        }
-
-        function pad(n) {
-            return n < 10 ? '0' + n : n;
-        }
-
-    });
-</script>--%>
 <script>
     let page;
     let orderBy;
     let isLoading = false;
+    let totalPages = null;
+    let pageSize = 20;
 
     document.addEventListener('DOMContentLoaded', () => {
         page = 0;
@@ -219,15 +166,27 @@
         }
 
         function loadPortfolios() {
+            if (totalPages !== null && page >= totalPages) return;
             if (isLoading) return;
             isLoading = true;
 
             fetch(`${pageContext.request.contextPath}/portfolio/list?page=\${page}&size=20&orderBy=\${orderBy}`)
                 .then(res => res.json())
                 .then(data => {
+                    // 첫 요청일 때만 totalCount 응답
+                    if (data.totalCount !== undefined && totalPages === null) {
+                        totalPages = Math.ceil(data.totalCount / pageSize);
+                        console.log("총 페이지 수:", totalPages);
+                    }
+
                     renderPortfolioCards(data);
                     page++;
+
                     isLoading = false;
+
+                    if (totalPages !== null && page >= totalPages) {
+                        document.querySelector("#end-message")?.classList.remove("hidden");
+                    }
                 })
                 .catch(err => {
                     console.error("포트폴리오 로딩 중 오류:", err);

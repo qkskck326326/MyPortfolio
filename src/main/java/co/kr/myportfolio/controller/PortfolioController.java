@@ -94,6 +94,12 @@ public class PortfolioController {
         response.put("portfolioCardList", portfolioCardList);
         response.put("message", "프로젝트 카드 리스트 불러옴");
 
+        // ✅ 첫 번째 요청일 경우에만 totalCount 포함
+        if (page == 0) {
+            int totalCount = portfolioService.getPortfolioTotalCount();
+            response.put("totalCount", totalCount);
+        }
+
         return ResponseEntity.ok(response);
     }
 
