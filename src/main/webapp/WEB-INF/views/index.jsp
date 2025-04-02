@@ -97,6 +97,7 @@
 <body>
 <jsp:include page="/WEB-INF/views/common/header.jsp" />
 
+<p id="search-info" style="text-align: center; font-weight: bold; margin: 20px 0;"></p>
 <div id="cardContainer" class="card-container"></div>
 
 <p id="end-message" class="hidden" style="text-align:center; color:gray; margin: 40px 0;">
@@ -108,37 +109,34 @@
 <script>
     let page;
     let orderBy;
+    let searchBy;
     let isLoading = false;
     let totalPages = null;
     let pageSize = 20;
+    let keyword = '';
+    let tags;
+    let searchSelect = document.querySelector("#search-select")
 
     document.addEventListener('DOMContentLoaded', () => {
         page = 0;
-        orderBy = document.querySelector(".form-select").value; // DOM이 로드된 후에 접근
+        orderBy = document.querySelector("#sort-select").value;
+        searchSelect = document.querySelector("#search-select")
 
-        // 수정 - 닉네임 클릭시
-        $(document).on('click', '.nickname', function (e) {
-            e.preventDefault();     // 링크 이동 방지
-            e.stopPropagation();    // 부모 <a> 클릭 방지
-            const nickname = $(this).data('user');
-
-            console.log(`작성자 클릭: \${nickname}`);
-            // 예시: location.href = `${pageContext.request.contextPath}/user/\${nickname}`;
-        });
-
+        // 한 자리 숫자를 두 자리 문자열로 변환하는 보조 함수
         function pad(n) {
             return n < 10 ? '0' + n : n;
         }
 
+        // 날짜 배열을 'yyyy-mm-dd hh:mm' 문자열로 변환
         function formatDate(arr) {
             const [year, month, day, hour, min] = arr;
             return year + '-' + pad(month) + '-' + pad(day) + ' ' + pad(hour) + ':' + pad(min);
         }
 
+        // 포트폴리오 카드 HTML을 생성해서 목록에 추가
         function renderPortfolioCards(data) {
             const cardList = data.portfolioCardList;
             const $container = $('#cardContainer');
-
             const defaultThumbnail = '${pageContext.request.contextPath}/resources/images/logo.webp';
 
             cardList.forEach(card => {
@@ -165,25 +163,42 @@
             });
         }
 
+        // 포트폴리오 목록을 서버에서 가져와 렌더링
         function loadPortfolios() {
             if (totalPages !== null && page >= totalPages) return;
             if (isLoading) return;
             isLoading = true;
 
-            fetch(`${pageContext.request.contextPath}/portfolio/list?page=\${page}&size=20&orderBy=\${orderBy}`)
+            let url = '${pageContext.request.contextPath}/portfolio/list?page=' + page +
+                '&size=' + pageSize +
+                '&orderBy=' + orderBy +
+                '&keyword=' + encodeURIComponent(keyword);
+
+            // tags 배열이 있을 때 추가
+            if (tags != null){
+                tags.forEach(tag => {
+                    url += `&tags=\${encodeURIComponent(tag)}`;
+                });
+            }
+
+            fetch(url)
                 .then(res => res.json())
                 .then(data => {
-                    // 첫 요청일 때만 totalCount 응답
+                    // 첫 요청일 경우 총 페이지 수 계산 및 검색어 결과 표시
                     if (data.totalCount !== undefined && totalPages === null) {
                         totalPages = Math.ceil(data.totalCount / pageSize);
-                        console.log("총 페이지 수:", totalPages);
+                        if (keyword) {
+                            document.querySelector("#search-info").textContent = `"\${keyword}" 검색 결과 총 \${data.totalCount}건`;
+                        } else {
+                            document.querySelector("#search-info").textContent = "";
+                        }
                     }
-
+                    console.log("orderBy : " + orderBy)
                     renderPortfolioCards(data);
                     page++;
-
                     isLoading = false;
 
+                    // 마지막 페이지 도달 시 메시지 표시
                     if (totalPages !== null && page >= totalPages) {
                         document.querySelector("#end-message")?.classList.remove("hidden");
                     }
@@ -194,20 +209,69 @@
                 });
         }
 
+        // 스크롤이 바닥 근처일 때 자동 로딩
         window.addEventListener('scroll', () => {
             if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 300) {
                 loadPortfolios();
             }
         });
 
-        document.querySelector(".form-select").addEventListener("change", function () {
+        // 정렬 기준 변경 시 다시 로딩
+        document.querySelector("#sort-select").addEventListener("change", function () {
             orderBy = this.value;
             page = 0;
-            document.querySelector("#portfolio-list").innerHTML = "";
+            totalPages = null;
+            document.querySelector("#cardContainer").innerHTML = "";
+            document.querySelector("#end-message")?.classList.add("hidden");
             loadPortfolios();
         });
 
-        // 최초 호출
+        // 검색 기준 변경시
+        searchSelect.addEventListener("change", function () {
+            searchBy = this.value;
+            tags = null;
+            keyword = null;
+        });
+
+        // 검색 버튼 클릭 시 검색 실행
+        document.querySelector("#search-btn").addEventListener("click", function () {
+            keyword = document.querySelector("#search-box").value.trim();
+            page = 0;
+            totalPages = null;
+            if (searchSelect.value === "tag"){
+                tags = Array.from(document.querySelectorAll('#tag-list .tag-chip i'))
+                    .map(el => el.getAttribute("data-tag"));
+            }
+            document.querySelector("#cardContainer").innerHTML = "";
+            document.querySelector("#end-message")?.classList.add("hidden");
+            loadPortfolios();
+        });
+
+        // 검색창 입력 시 keyword 업데이트
+        const searchInput = document.querySelector(".search-box");
+        if (searchInput) {
+            searchInput.addEventListener("input", function () {
+                keyword = this.value.trim();
+            });
+
+            // 엔터키로 검색
+            searchInput.addEventListener("keyup", function (e) {
+                if (e.key === "Enter" && searchSelect.value === "title") {
+                    e.preventDefault();
+                    document.querySelector("#search-btn")?.click();
+                }
+            });
+        }
+
+        // 닉네임 클릭 시 사용자 페이지 이동 준비 (현재는 콘솔 출력만)
+        $(document).on('click', '.nickname', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const nickname = $(this).data('user');
+            console.log(`작성자 클릭: \${nickname}`);
+        });
+
+        // 첫 페이지 로딩
         loadPortfolios();
     });
 </script>

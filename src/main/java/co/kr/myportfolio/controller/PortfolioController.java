@@ -80,13 +80,20 @@ public class PortfolioController {
     public ResponseEntity<?> getPortfoliosWithPaging(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
-            @RequestParam(defaultValue = "latest") String orderBy
-    ) {
+            @RequestParam(defaultValue = "latest") String orderBy,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) List<String> tags
+    )
+    {
+        System.out.println("tags = " + tags);
         int offset = page * size;
         Map<String, Object> params = new HashMap<>();
         params.put("offset", offset);
         params.put("limit", size);
         params.put("orderBy", orderBy);
+        if (keyword != null && !keyword.isBlank()) {
+            params.put("keyword", keyword);
+        }
 
         List<PortfolioCardDTO> portfolioCardList = portfolioService.getPortfolioCardListWithSortBy(params);
 
@@ -94,9 +101,9 @@ public class PortfolioController {
         response.put("portfolioCardList", portfolioCardList);
         response.put("message", "프로젝트 카드 리스트 불러옴");
 
-        // ✅ 첫 번째 요청일 경우에만 totalCount 포함
+        // 첫 번째 요청일 경우에만 totalCount 포함
         if (page == 0) {
-            int totalCount = portfolioService.getPortfolioTotalCount();
+            int totalCount = portfolioService.getPortfolioTotalCount(params);
             response.put("totalCount", totalCount);
         }
 

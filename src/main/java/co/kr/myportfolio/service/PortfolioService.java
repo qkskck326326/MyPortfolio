@@ -75,5 +75,5 @@ public class PortfolioService {
         return portfolioMapper.getPortfolioCardListWithSortBy(params);
     }
 
-    public int getPortfolioTotalCount() { return portfolioMapper.getPortfolioTotalCount();}
+    public int getPortfolioTotalCount(Map<String, Object> params) { return portfolioMapper.getPortfolioTotalCount(params);}
 }

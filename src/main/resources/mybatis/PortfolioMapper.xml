@@ -83,8 +83,14 @@
     </select>
 
     <!--포트폴리오 전체 갯수 반환-->
-    <select id="getPortfolioTotalCount" resultType="int">
-        SELECT COUNT(*) FROM Portfolio
+    <select id="getPortfolioTotalCount" parameterType="map" resultType="int">
+        SELECT COUNT(*)
+        FROM Portfolio
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND title LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+        </where>
     </select>
 
     <!--무한스크롤 - 카드 리스트 반환 + 정렬기준-->
@@ -98,6 +104,11 @@
         p.user_nickname AS userNickname,
         p.created_at AS createdAt
         FROM Portfolio p
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND p.title LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+        </where>
         ORDER BY
         <choose>
             <when test="orderBy == 'popular'">
@@ -109,6 +120,7 @@
         </choose>
         LIMIT #{limit} OFFSET #{offset}
     </select>
+
 
     <!-- 좋아요 여부 확인 -->
     <select id="checkUserLike" resultType="boolean">
