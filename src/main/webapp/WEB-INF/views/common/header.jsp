@@ -102,11 +102,48 @@
 
     /* 드롭다운 스타일 */
     .form-select {
-        width: 120px;
+        width: 140px;
         border-radius: 10px;
         font-size: 14px;
         padding: 8px;
     }
+
+    .hidden {
+        display: none !important;
+    }
+
+    .tag-chip {
+        background-color: #e0f7fa;
+        border: 1px solid #00bcd4;
+        border-radius: 20px;
+        padding: 6px 12px;
+        font-size: 14px;
+        color: #007baf;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .tag-chip i {
+        cursor: pointer;
+    }
+
+    .tag-box {
+        position: absolute;
+        top: calc(100% + 8px); /* 입력창 바로 아래 (8px 간격) */
+        left: 0;
+        width: 300px; /* 고정 가로 크기 */
+        background-color: white;
+        border: 1px solid #ccc;
+        border-radius: 12px;
+        padding: 10px;
+        z-index: 999;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+
+        max-height: 200px; /* 태그 많아질 경우 대비 */
+        overflow-y: auto;
+    }
+
 </style>
 
 <!-- 헤더바 -->
@@ -120,21 +157,39 @@
 
     <!-- 우측 메뉴 -->
     <div class="menu-right">
-        <!-- 드롭다운 -->
-        <select class="form-select">
+
+        <%--검색 기준 드롭다운--%>
+        <select id="search-select" class="form-select">
+            <option value="tag">테그로 검색</option>
+            <option value="title" selected>제목으로 검색</option>
+        </select>
+
+        <!-- 정렬 기준 드롭다운 -->
+        <select id="sort-select" class="form-select">
             <option value="popular">인기순</option>
             <option value="latest" selected>최신순</option>
         </select>
 
+        <!-- 태그 입력 UI -->
+        <div id="tag-ui" class="hidden d-flex flex-column align-items-start position-relative">
+            <input type="text" id="tag-input" class="search-box" placeholder="태그 입력 후 Enter" style="margin-top: 8px;">
+
+            <!-- 태그 리스트 영역 -->
+            <div class="tag-box">
+                <div id="tag-list" class="d-flex flex-wrap" style="gap: 8px;">
+                    <span id="tag-placeholder" class="text-muted">테그를 입력해 주세요</span>
+                </div>
+            </div>
+        </div>
+
         <!-- 검색 입력창 -->
-        <input type="text" class="search-box" placeholder="검색어 입력">
+        <input type="text" id="search-box" class="search-box" placeholder="검색어 입력">
 
         <!-- 검색 버튼 -->
-        <div class="search-btn">검색</div>
+        <div id="search-btn" class="search-btn">검색</div>
+
 
         <!-- 로그인 버튼 -->
-
-
         <c:choose>
             <c:when test="${not empty sessionScope.user_nickname}">
                 <!-- 사용자 정보 및 로그아웃 버튼 -->
@@ -158,7 +213,8 @@
 
             </c:when>
             <c:otherwise>
-                <button class="login-btn" onclick="location.href='${pageContext.request.contextPath}/login'">로그인</button>
+                <button class="login-btn" onclick="location.href='${pageContext.request.contextPath}/login'">로그인
+                </button>
             </c:otherwise>
         </c:choose>
     </div>
@@ -171,7 +227,8 @@
                 <h5 class="modal-title" id="logoutModalLabel">
                     <i class="bi bi-box-arrow-right"></i> 로그아웃
                 </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
             </div>
             <div class="modal-body text-center">
                 <p class="fs-5 fw-bold text-danger">❗ 로그아웃 하시겠습니까?</p>
@@ -186,33 +243,95 @@
 
 
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
+    document.addEventListener("DOMContentLoaded", function () {
+
         // 로그아웃 버튼 클릭 시 로그아웃 모달 띄우기
-        document.getElementById("logoutBtn").addEventListener("click", function() {
-            showLogoutModal();
-        });
+        const logoutBtn = document.getElementById("logoutBtn");
+        if (logoutBtn) {
+            logoutBtn.addEventListener("click", function () {
+                showLogoutModal();
+            });
+        }
 
         // 확인 버튼 클릭 시 메인 페이지로 이동
-        document.getElementById("logoutConfirmBtn").addEventListener("click", function() {
-            $.post("${pageContext.request.contextPath}/logout", function (res) {
-                if (res.status === "success") {
-                    location.reload(); // 페이지 새로고침
-                }
+        const logoutConfirmBtn = document.getElementById("logoutConfirmBtn");
+        if (logoutConfirmBtn) {
+            logoutConfirmBtn.addEventListener("click", function () {
+                $.post("${pageContext.request.contextPath}/logout", function (res) {
+                    if (res.status === "success") {
+                        location.reload();
+                    }
+                });
             });
-        });
+        }
 
         // 로그아웃 이벤트 발생 시 모달 열기
         function showLogoutModal() {
             var logoutModal = new bootstrap.Modal(document.getElementById("logoutModal"));
             logoutModal.show();
         }
-    });
-</script>
 
-<script>
-    $(document).ready(function () {
-        $("#logoutBtn").click(function () {
+        const searchSelect = document.getElementById("search-select");
+        const searchBox = document.getElementById("search-box");
+        const tagUI = document.getElementById("tag-ui");
+        const tagInput = document.getElementById("tag-input");
+        const tagList = document.getElementById("tag-list");
+        const tags = [];
 
+        // 검색 기준 변경 시 UI 전환
+        searchSelect.addEventListener("change", function () {
+            if (this.value === "tag") {
+                searchBox.classList.add("hidden");
+                tagUI.classList.remove("hidden");
+            } else {
+                searchBox.classList.remove("hidden");
+                tagUI.classList.add("hidden");
+            }
         });
+
+        // 태그 입력 후 Enter 입력 시 추가
+        tagInput.addEventListener("keydown", function (e) {
+            if (e.key === "Enter" && this.value.trim() !== "") {
+                e.preventDefault();
+                const tag = this.value.trim().toLowerCase();
+                if (!tags.includes(tag)) {
+                    tags.push(tag);
+
+                    const tagEl = document.createElement("span");
+                    tagEl.className = "tag-chip";
+                    tagEl.innerHTML = `\${tag} <i class="bi bi-x-lg" data-tag="\${tag}"></i>`;
+
+                    // 삭제 이벤트
+                    tagEl.querySelector("i").addEventListener("click", function () {
+                        const value = this.getAttribute("data-tag");
+                        tags.splice(tags.indexOf(value), 1);
+                        tagEl.remove();
+                        updateTagPlaceholder()
+                    });
+
+                    tagList.appendChild(tagEl);
+                    this.value = "";
+                    updateTagPlaceholder();
+                }
+            }
+        });
+
+        function updateTagPlaceholder() {
+            const placeholder = document.getElementById("tag-placeholder");
+            if (tags.length === 0) {
+                placeholder.style.display = "inline";
+            } else {
+                placeholder.style.display = "none";
+            }
+        }
+
+        const searchBtn = document.getElementById("search-btn");
+        searchBox.addEventListener("keyup", function (e) {
+            if (e.key === "Enter" && searchSelect.value === "title") {
+                e.preventDefault();
+                searchBtn.click(); // 검색 버튼 클릭 트리거
+            }
+        });
+
     });
 </script>
