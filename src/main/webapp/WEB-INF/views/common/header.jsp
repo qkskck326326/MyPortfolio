@@ -172,7 +172,7 @@
 
         <!-- 태그 입력 UI -->
         <div id="tag-ui" class="hidden d-flex flex-column align-items-start position-relative">
-            <input type="text" id="tag-input" class="search-box" placeholder="태그 입력 후 Enter" style="margin-top: 8px;">
+            <input type="text" id="tag-input-header" class="search-box" placeholder="태그 입력 후 Enter" style="margin-top: 8px;">
 
             <!-- 태그 리스트 영역 -->
             <div class="tag-box">
@@ -274,13 +274,14 @@
         const searchSelect = document.getElementById("search-select");
         const searchBox = document.getElementById("search-box");
         const tagUI = document.getElementById("tag-ui");
-        const tagInput = document.getElementById("tag-input");
+        const tagInput = document.getElementById("tag-input-header");
         const tagList = document.getElementById("tag-list");
         const tags = [];
 
         // 검색 기준 변경 시 UI 전환
         searchSelect.addEventListener("change", function () {
             if (this.value === "tag") {
+                searchBox.value = null;
                 searchBox.classList.add("hidden");
                 tagUI.classList.remove("hidden");
             } else {
