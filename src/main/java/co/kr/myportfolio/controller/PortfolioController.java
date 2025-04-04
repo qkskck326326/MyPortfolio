@@ -85,7 +85,6 @@ public class PortfolioController {
             @RequestParam(required = false) List<String> tags
     )
     {
-        System.out.println("tags = " + tags);
         int offset = page * size;
         Map<String, Object> params = new HashMap<>();
         params.put("offset", offset);
@@ -93,6 +92,9 @@ public class PortfolioController {
         params.put("orderBy", orderBy);
         if (keyword != null && !keyword.isBlank()) {
             params.put("keyword", keyword);
+        }
+        if (tags!= null && !tags.isEmpty()) {
+            params.put("tags", tags);
         }
 
         List<PortfolioCardDTO> portfolioCardList = portfolioService.getPortfolioCardListWithSortBy(params);
