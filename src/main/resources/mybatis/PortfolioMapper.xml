@@ -86,22 +86,22 @@
     <select id="getPortfolioTotalCount" parameterType="map" resultType="int">
         SELECT COUNT(*)
         FROM Portfolio p
-        <where>
-            <if test="keyword != null and keyword != ''">
-                AND p.title LIKE CONCAT('%', #{keyword}, '%')
-            </if>
-            <if test="tags != null and !tags.isEmpty()">
-                AND EXISTS (
+        WHERE 1=1
+        <if test="tags != null and !tags.isEmpty()">
+            <foreach item="tag" collection="tags" open="AND (" separator="AND" close=")">
+                EXISTS (
                 SELECT 1
                 FROM Portfolio_Tags pt
-                WHERE pt.portfolio_id = p.id AND pt.tag IN
-                <foreach item="tag" collection="tags" open="(" separator="," close=")">
-                    #{tag}
-                </foreach>
+                WHERE pt.portfolio_id = p.id
+                AND pt.tag = #{tag}
                 )
-            </if>
-        </where>
+            </foreach>
+        </if>
+        <if test="keyword != null and keyword != ''">
+            AND p.title LIKE CONCAT('%', #{keyword}, '%')
+        </if>
     </select>
+
 
     <!--무한스크롤 - 카드 리스트 반환 + 정렬기준-->
     <select id="getPortfolioCardListWithSortBy" parameterType="map" resultType="PortfolioCardDTO">
