@@ -47,18 +47,17 @@
 
     <!--특정 포트폴리오 및 테그 반환-->
     <select id="getPortfolioAndTag" resultMap="PortfolioResultMap">
-        SELECT
-            p.id AS id,
-            p.id AS portfolio_id,
-            p.user_pid,
-            p.user_nickname,
-            p.thumbnail,
-            p.title,
-            p.content,
-            p.created_at,
-            p.updated_at,
-            pt.tag,
-            IF(upl.user_pid IS NULL, FALSE, TRUE) AS is_like
+        SELECT p.id                                  AS id,
+               p.id                                  AS portfolio_id,
+               p.user_pid,
+               p.user_nickname,
+               p.thumbnail,
+               p.title,
+               p.content,
+               p.created_at,
+               p.updated_at,
+               pt.tag,
+               IF(upl.user_pid IS NULL, FALSE, TRUE) AS is_like
         FROM Portfolio p
                  LEFT JOIN Portfolio_Tags pt ON p.id = pt.portfolio_id
                  LEFT JOIN User_Portfolio_Like upl
@@ -68,18 +67,15 @@
 
     <!--포트폴리오 카드 리스트 반환-->
     <select id="getPortfolioCardList" resultType="PortfolioCardDTO">
-        SELECT
-            p.id AS portfolioId,
-            p.user_pid AS userPid,
-            p.like_count AS likeCount,
-            p.thumbnail AS thumbnail,
-            p.title AS portfolioTitle,
-            p.user_nickname AS userNickname,
-            p.created_at AS createdAt
-        FROM
-            Portfolio p
-        ORDER BY
-            p.created_at DESC
+        SELECT p.id            AS portfolioId,
+               p.user_pid      AS userPid,
+               p.like_count    AS likeCount,
+               p.thumbnail     AS thumbnail,
+               p.title         AS portfolioTitle,
+               p.user_nickname AS userNickname,
+               p.created_at    AS createdAt
+        FROM Portfolio p
+        ORDER BY p.created_at DESC
     </select>
 
     <!--포트폴리오 전체 갯수 반환-->
@@ -114,21 +110,20 @@
         p.user_nickname AS userNickname,
         p.created_at AS createdAt
         FROM Portfolio p
-        <where>
-            <if test="keyword != null and keyword != ''">
-                AND p.title LIKE CONCAT('%', #{keyword}, '%')
-            </if>
-            <if test="tags != null and !tags.isEmpty()">
-                AND EXISTS (
+        WHERE 1=1
+        <if test="tags != null and !tags.isEmpty()">
+            <foreach item="tag" collection="tags" open="AND (" separator="AND" close=")">
+                EXISTS (
                 SELECT 1
                 FROM Portfolio_Tags pt
-                WHERE pt.portfolio_id = p.id AND pt.tag IN
-                <foreach item="tag" collection="tags" open="(" separator="," close=")">
-                    #{tag}
-                </foreach>
+                WHERE pt.portfolio_id = p.id
+                AND pt.tag = #{tag}
                 )
-            </if>
-        </where>
+            </foreach>
+        </if>
+        <if test="keyword != null and keyword != ''">
+            AND p.title LIKE CONCAT('%', #{keyword}, '%')
+        </if>
         ORDER BY
         <choose>
             <when test="orderBy == 'popular'">
@@ -142,14 +137,12 @@
     </select>
 
 
-
     <!-- 좋아요 여부 확인 -->
     <select id="checkUserLike" resultType="boolean">
-        SELECT EXISTS (
-            SELECT 1
-            FROM User_Portfolio_Like
-            WHERE user_pid = #{userPid} AND portfolio_id = #{portfolioId}
-        )
+        SELECT EXISTS (SELECT 1
+                       FROM User_Portfolio_Like
+                       WHERE user_pid = #{userPid}
+                         AND portfolio_id = #{portfolioId})
     </select>
 
     <!--좋아요 표시-->
@@ -167,8 +160,10 @@
 
     <!-- 좋아요 삭제 -->
     <delete id="deleteLike">
-        DELETE FROM User_Portfolio_Like
-        WHERE user_pid = #{userPid} AND portfolio_id = #{portfolioId}
+        DELETE
+        FROM User_Portfolio_Like
+        WHERE user_pid = #{userPid}
+          AND portfolio_id = #{portfolioId}
     </delete>
 
     <!-- 좋아요 수 감소 (0 이하로는 떨어지지 않도록 처리) -->
