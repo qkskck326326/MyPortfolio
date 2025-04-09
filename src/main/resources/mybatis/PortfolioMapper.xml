@@ -28,7 +28,7 @@
 
         <!-- 포트폴리오 객체 매핑 -->
         <association property="portfolio" javaType="Portfolio">
-            <id property="id" column="portfolio_id"/>
+            <id property="id" column="id"/>
             <result property="userPid" column="user_pid"/>
             <result property="likeCount" column="like_count"/>
             <result property="userNickname" column="user_nickname"/>
@@ -47,9 +47,10 @@
 
     <!--특정 포트폴리오 및 테그 반환-->
     <select id="getPortfolioAndTag" resultMap="PortfolioResultMap">
-        SELECT p.id                                  AS id,
-               p.id                                  AS portfolio_id,
+        SELECT p.id                                  AS portfolio_id,
+               p.id,
                p.user_pid,
+               p.like_count,
                p.user_nickname,
                p.thumbnail,
                p.title,
