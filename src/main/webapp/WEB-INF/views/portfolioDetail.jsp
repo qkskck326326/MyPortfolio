@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <html>
 <head>
     <%--아이콘 라이브러리--%>
@@ -48,12 +49,12 @@
             border: 1px solid #d1d1e0;
             transition: all 0.3s ease;
         }
-
         .tag-badge:hover {
             background-color: #dbeafe;
             color: #1d4ed8;
             cursor: pointer;
         }
+
         .floating-nav {
             position: fixed;
             top: 40%;
@@ -62,8 +63,8 @@
             flex-direction: column;
             gap: 16px;
             z-index: 999;
+            align-items: center;
         }
-
         .floating-nav button {
             width: 50px;
             height: 50px;
@@ -76,9 +77,28 @@
             cursor: pointer;
             transition: all 0.3s ease;
         }
-
         .floating-nav button:hover {
             background-color: #2563eb;
+        }
+
+        .info-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-left: auto;
+        }
+        .actions p {
+            cursor: pointer;
+            color: #007bff;
+            margin: 0;
+            transition: color 0.3s ease;
+        }
+        .actions p:hover {
+            color: gray;
         }
     </style>
 </head>
@@ -87,10 +107,20 @@
 <div class="portfolio-container">
     <h1>${portfolio.title}</h1>
     <p>작성자 : ${portfolio.userNickname}</p>
-    <p>작성일: ${portfolio.createdAt}</p>
-    <p>[ 기술테그 ]</p>
+
+    <div class="info-container">
+        <p>작성일: <fmt:formatDate value="${portfolio.createdAt}" pattern="yyyy년 MM월 dd일" /></p>
+        <c:if test="${portfolio.userPid == sessionScope.user_pid}">
+            <div class="actions">
+                <p>수정</p>
+                <p>삭제</p>
+            </div>
+        </c:if>
+    </div>
     <c:forEach var="tag" items="${portfolioTags}">
-        <span class="tag-badge">${tag}</span>
+        <c:if test="${not empty tag}">
+            <span class="tag-badge">${tag}</span>
+        </c:if>
     </c:forEach>
 
     <div id="viewer" class="markdown-viewer"></div>
@@ -110,6 +140,7 @@
                 </button>
             </c:otherwise>
         </c:choose>
+        <p id="likeCount">${portfolio.likeCount}</p>
         <button title="복사">
             <i class="fas fa-copy"></i>
         </button>
@@ -145,18 +176,23 @@
                 .then(data => {
                     const btn = document.getElementById("likeBtn");
                     const icon = btn.querySelector("i");
+                    const likeCountEl = document.getElementById("likeCount");
+                    let currentLikeCount = parseInt(likeCountEl.textContent);
 
                     if (data.liked) {
                         // 좋아요 상태로 UI 변경
                         btn.style.backgroundColor = "#ef4444";
                         icon.className = "fas fa-thumbs-up";
+                        currentLikeCount += 1;
                     } else {
                         // 좋아요 취소 상태로 UI 변경
                         btn.style.backgroundColor = "#1d4ed8";
                         icon.className = "far fa-thumbs-up";
+                        currentLikeCount -= 1;
                     }
 
                     // 상태 갱신
+                    likeCountEl.textContent = currentLikeCount;
                     isLiked = data.liked;
                 })
                 .catch(err => {
