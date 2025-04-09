@@ -172,7 +172,7 @@
 
         <!-- 태그 입력 UI -->
         <div id="tag-ui" class="hidden d-flex flex-column align-items-start position-relative">
-            <input type="text" id="tag-input-header" class="search-box" placeholder="태그 입력 후 Enter" style="margin-top: 8px;">
+            <input type="text" id="tag-input-header" class="search-box" placeholder="태그 입력 후 , (쉼표)" style="margin-top: 8px;">
 
             <!-- 태그 리스트 영역 -->
             <div class="tag-box">
@@ -290,9 +290,9 @@
             }
         });
 
-        // 태그 입력 후 Enter 입력 시 추가
+        // 태그 입력 후 , (쉼표) 입력 시 추가
         tagInput.addEventListener("keydown", function (e) {
-            if (e.key === "Enter" && this.value.trim() !== "") {
+            if (e.key === "," && this.value.trim() !== "") {
                 e.preventDefault();
                 const tag = this.value.trim().toLowerCase();
                 if (!tags.includes(tag)) {
@@ -326,7 +326,14 @@
             }
         }
 
+        // 엔터로 검색 트리거
         const searchBtn = document.getElementById("search-btn");
+        tagInput.addEventListener("keypress", function (e) {
+            if (e.key === "Enter" && tags.length > 0) {
+                e.preventDefault();
+                document.getElementById("search-btn").click(); // 검색 버튼 클릭 트리거
+            }
+        });
         searchBox.addEventListener("keyup", function (e) {
             if (e.key === "Enter" && searchSelect.value === "title") {
                 e.preventDefault();
