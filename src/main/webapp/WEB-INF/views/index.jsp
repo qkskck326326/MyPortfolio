@@ -234,8 +234,10 @@
             keyword = null;
         });
 
+        const searchBtn = document.querySelector("#search-btn");
+
         // 검색 버튼 클릭 시 검색 실행
-        document.querySelector("#search-btn").addEventListener("click", function () {
+        searchBtn.addEventListener("click", function () {
             keyword = document.querySelector("#search-box").value.trim();
             page = 0;
             totalPages = null;
@@ -259,7 +261,7 @@
             searchInput.addEventListener("keyup", function (e) {
                 if (e.key === "Enter" && searchSelect.value === "title") {
                     e.preventDefault();
-                    document.querySelector("#search-btn")?.click();
+                    searchBtn.click();
                 }
             });
         }
