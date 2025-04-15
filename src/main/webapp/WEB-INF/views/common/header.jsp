@@ -424,25 +424,16 @@
         }
     }
 
-        // 엔터로 검색 트리거
-        const searchBtn = document.getElementById("search-btn");
-        tagInput.addEventListener("keypress", function (e) {
-            if (e.key === "Enter" && tags.length > 0) {
-                e.preventDefault();
-                document.getElementById("search-btn").click(); // 검색 버튼 클릭 트리거
-            }
-        });
-        searchBox.addEventListener("keyup", function (e) {
-            if (e.key === "Enter" && searchSelect.value === "title") {
-                e.preventDefault();
-                searchBtn.click(); // 검색 버튼 클릭 트리거
-            }
-        });
     // 로그아웃 이벤트 발생 시 모달 열기
     function showLogoutModal() {
         var logoutModal = new bootstrap.Modal(document.getElementById("logoutModal"));
         logoutModal.show();
     }
 
+    // 테그 수정 이벤트
+    function triggerTagUpdate() {
+        const event = new CustomEvent("tagsUpdated", { detail: { tags } });
+        window.dispatchEvent(event); // 전역으로 이벤트 발행
+    }
 
 </script>
