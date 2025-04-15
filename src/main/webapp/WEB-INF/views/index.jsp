@@ -107,17 +107,18 @@
 </body>
 
 <script>
-    let page;
-    let orderBy;
-    let searchBy;
-    let isLoading = false;
-    let totalPages = null;
-    let pageSize = 20;
-    let keyword = '';
-    let tags;
-    let searchSelect = document.querySelector("#search-select")
 
     document.addEventListener('DOMContentLoaded', () => {
+        let page;
+        let orderBy;
+        let searchBy;
+        let isLoading = false;
+        let totalPages = null;
+        let pageSize = 20;
+        let keyword = '';
+        let tags;
+        let searchSelect = document.querySelector("#search-select")
+
         page = 0;
         orderBy = document.querySelector("#sort-select").value;
         searchSelect = document.querySelector("#search-select")
@@ -272,7 +273,13 @@
         });
 
         // 첫 페이지 로딩
-        loadPortfolios();
+        if (!window.hasTakenSearchOption) {
+            console.log("기본로딩");
+            loadPortfolios();
+        }else{
+            console.log("검색전달 로딩");
+            searchBtn.click();
+        }
     });
 </script>
 
