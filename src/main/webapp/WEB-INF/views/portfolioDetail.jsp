@@ -55,6 +55,12 @@
             cursor: pointer;
         }
 
+        .selected-tag {
+            background-color: #dbeafe !important;
+            color: #1d4ed8 !important;
+            border-color: #93c5fd;
+        }
+
         .floating-nav {
             position: fixed;
             top: 40%;
@@ -158,7 +164,7 @@
             initialValue: markdownContent
         });
 
-        // 초기 좋아요 상태를 저장 (JSP에서 Boolean -> JS Boolean)
+        // 초기 좋아요 상태 저장
         let isLiked = ${is_like ? 'true' : 'false'};
 
         document.getElementById("likeBtn").addEventListener("click", function () {
@@ -199,6 +205,37 @@
                     console.error("좋아요 처리 중 오류 발생:", err);
                     alert("좋아요 처리 중 오류가 발생했습니다.");
                 });
+        });
+
+        let searchSelect = document.querySelector("#search-select");
+        const searchBox = document.getElementById("search-box");
+        const tagUI = document.getElementById("tag-ui");
+        document.querySelectorAll(".tag-badge").forEach(tag => {
+            tag.addEventListener("click", function () {
+                // 테그로 검색으로 변환
+                if (!(searchSelect.value === "tag")){
+                    searchSelect.value = "tag";
+                    searchBox.classList.add("hidden");
+                    tagUI.classList.remove("hidden");
+                }
+                const tagValue = this.textContent.trim(); // 클릭한 태그의 텍스트
+
+                addTag(tagValue); // 검색창에 테그 더하기
+            });
+        });
+
+        window.addEventListener("tagsUpdated", function (e) {
+            const activeTags = e.detail.tags;
+
+            document.querySelectorAll(".tag-badge").forEach(tagEl => {
+                const tagValue = tagEl.textContent.trim();
+
+                if (activeTags.includes(tagValue)) {
+                    tagEl.classList.add("selected-tag");
+                } else {
+                    tagEl.classList.remove("selected-tag");
+                }
+            });
         });
     </script>
 </div>
