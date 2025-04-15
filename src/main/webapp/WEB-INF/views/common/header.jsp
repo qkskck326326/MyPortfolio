@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <script src="${pageContext.request.contextPath}/resources/js/jquery-3.6.0.js"></script>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!-- Bootstrap CSS -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <!-- Bootstrap JS -->
@@ -146,6 +147,24 @@
 
 </style>
 
+<%-- 옵션 전달받았을 경우 --%>
+<c:if test="${not empty takenSearchOption}">
+    <script>
+        window.hasTakenSearchOption = true;
+        window.takenSearchOption = {
+            searchOption: "${takenSearchOption.searchOption}",
+            orderBy: "${takenSearchOption.orderBy}",
+            keyword: "${takenSearchOption.keyword}",
+            tags: [
+                <c:forEach var="tag" items="${takenSearchOption.tags}" varStatus="status">
+                "${tag}"<c:if test="${!status.last}">,</c:if>
+                </c:forEach>
+            ]
+        };
+        console.log(takenSearchOption);
+    </script>
+</c:if>
+
 <!-- 헤더바 -->
 <div class="header-bar">
     <!-- 좌측 로고 -->
@@ -243,7 +262,15 @@
 
 
 <script>
+    const tags = [];
+    const tagList = document.getElementById("tag-list");
+
     document.addEventListener("DOMContentLoaded", function () {
+        const searchSelect = document.getElementById("search-select");
+        const searchBox = document.getElementById("search-box");
+        const tagUI = document.getElementById("tag-ui");
+        const tagInput = document.getElementById("tag-input-header");
+
 
         // 로그아웃 버튼 클릭 시 로그아웃 모달 띄우기
         const logoutBtn = document.getElementById("logoutBtn");
@@ -265,19 +292,6 @@
             });
         }
 
-        // 로그아웃 이벤트 발생 시 모달 열기
-        function showLogoutModal() {
-            var logoutModal = new bootstrap.Modal(document.getElementById("logoutModal"));
-            logoutModal.show();
-        }
-
-        const searchSelect = document.getElementById("search-select");
-        const searchBox = document.getElementById("search-box");
-        const tagUI = document.getElementById("tag-ui");
-        const tagInput = document.getElementById("tag-input-header");
-        const tagList = document.getElementById("tag-list");
-        const tags = [];
-
         // 검색 기준 변경 시 UI 전환
         searchSelect.addEventListener("change", function () {
             if (this.value === "tag") {
@@ -290,41 +304,125 @@
             }
         });
 
+        <c:if test="${not empty takenSearchOption}">
+            console.log("JSP에서 받은 옵션:", "${takenSearchOption.searchOption}");
+        </c:if>
+
         // 태그 입력 후 , (쉼표) 입력 시 추가
         tagInput.addEventListener("keydown", function (e) {
             if (e.key === "," && this.value.trim() !== "") {
                 e.preventDefault();
                 const tag = this.value.trim().toLowerCase();
-                if (!tags.includes(tag)) {
-                    tags.push(tag);
 
-                    const tagEl = document.createElement("span");
-                    tagEl.className = "tag-chip";
-                    tagEl.innerHTML = `\${tag} <i class="bi bi-x-lg" data-tag="\${tag}"></i>`;
+                addTag(tag);
+                this.value = "";
+            }
+        });
 
-                    // 삭제 이벤트
-                    tagEl.querySelector("i").addEventListener("click", function () {
-                        const value = this.getAttribute("data-tag");
-                        tags.splice(tags.indexOf(value), 1);
-                        tagEl.remove();
-                        updateTagPlaceholder()
-                    });
+        // 엔터로 검색 트리거
+        const searchBtn = document.getElementById("search-btn");
+        tagInput.addEventListener("keypress", function (e) {
+            if (e.key === "Enter" && tags.length > 0) {
+                e.preventDefault();
+                searchBtn.click(); // 검색 버튼 클릭 트리거
+            }
+        });
+        searchBox.addEventListener("keyup", function (e) {
+            if (e.key === "Enter" && searchSelect.value === "title") {
+                e.preventDefault();
+                searchBtn.click(); // 검색 버튼 클릭 트리거
+            }
+        });
 
-                    tagList.appendChild(tagEl);
-                    this.value = "";
-                    updateTagPlaceholder();
+        // 메인 페이지 밖에서 클릭 되었을 경우, 설정을 가지고 메인으로 이동
+        const isMainPage = ${fn:contains(pageContext.request.requestURI, '/index.jsp') ? 'true' : 'false'};
+        searchBtn.addEventListener("click", function (e){
+            if (!isMainPage){
+                e.preventDefault();
+                const form = document.createElement("form");
+                form.method = "POST";
+                form.action = `${pageContext.request.contextPath}/portfolio/search/withoutIndexPage`;
+                form.style.display = "none";
+
+                form.appendChild(createHiddenInput("searchOption", searchSelect.value));
+                form.appendChild(createHiddenInput("orderBy", document.getElementById("sort-select").value));
+                form.appendChild(createHiddenInput("keyword", searchBox.value));
+                form.appendChild(createHiddenInput("tags", tags.join(",")));
+
+                document.body.appendChild(form);
+                form.submit();
+
+                function createHiddenInput(name, value) {
+                    const input = document.createElement("input");
+                    input.type = "hidden";
+                    input.name = name;
+                    input.value = value;
+                    return input;
                 }
             }
         });
 
-        function updateTagPlaceholder() {
-            const placeholder = document.getElementById("tag-placeholder");
-            if (tags.length === 0) {
-                placeholder.style.display = "inline";
-            } else {
-                placeholder.style.display = "none";
+        if (window.hasTakenSearchOption) {
+            console.log("옵션 전달됨.")
+            const option = window.takenSearchOption;
+
+            // 검색 옵션
+            document.getElementById("search-select").value = option.searchOption || "title";
+            document.getElementById("sort-select").value = option.orderBy || "latest";
+
+            if (option.searchOption === "title") {
+                document.getElementById("search-box").value = option.keyword || "";
+            } else if (option.searchOption === "tag" && option.tags.length > 0) {
+                // 태그를 하나씩 입력 UI에 적용
+                option.tags.forEach(tag => {
+                    // tags 배열 재구성 등 기존 동작 로직 활용
+                    console.log("불러온 태그:", tag);
+                    addTag(tag);
+                });
+                searchBox.classList.add("hidden");
+                tagUI.classList.remove("hidden");
             }
+
+
         }
+
+    });
+
+    // 테그 추가 함수
+    function addTag(tag){
+        if (tags.includes(tag)) {
+            alert("이미 존재하는 태그입니다.");
+            return;
+        }
+
+        tags.push(tag);
+
+        const tagEl = document.createElement("span");
+        tagEl.className = "tag-chip";
+        tagEl.innerHTML = `\${tag} <i class="bi bi-x-lg" data-tag="\${tag}"></i>`;
+
+        // 삭제 이벤트
+        tagEl.querySelector("i").addEventListener("click", function () {
+            const value = this.getAttribute("data-tag");
+            tags.splice(tags.indexOf(value), 1);
+            tagEl.remove();
+            updateTagPlaceholder()
+            triggerTagUpdate()
+        });
+
+        tagList.appendChild(tagEl);
+        updateTagPlaceholder();
+        triggerTagUpdate()
+    }
+
+    function updateTagPlaceholder() {
+        const placeholder = document.getElementById("tag-placeholder");
+        if (tags.length === 0) {
+            placeholder.style.display = "inline";
+        } else {
+            placeholder.style.display = "none";
+        }
+    }
 
         // 엔터로 검색 트리거
         const searchBtn = document.getElementById("search-btn");
@@ -340,6 +438,11 @@
                 searchBtn.click(); // 검색 버튼 클릭 트리거
             }
         });
+    // 로그아웃 이벤트 발생 시 모달 열기
+    function showLogoutModal() {
+        var logoutModal = new bootstrap.Modal(document.getElementById("logoutModal"));
+        logoutModal.show();
+    }
 
-    });
+
 </script>
