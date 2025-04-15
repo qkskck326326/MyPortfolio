@@ -3,6 +3,7 @@ package co.kr.myportfolio.controller;
 import co.kr.myportfolio.dto.PortfolioCardDTO;
 import co.kr.myportfolio.dto.PortfolioRequestDTO;
 import co.kr.myportfolio.dto.PortfolioResponseDTO;
+import co.kr.myportfolio.dto.SearchWithoutIndexDTO;
 import co.kr.myportfolio.service.PortfolioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -10,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpSession;
 import java.util.HashMap;
@@ -155,6 +157,14 @@ public class PortfolioController {
                 "message", liked ? "좋아요 완료" : "좋아요 취소"
         ));
     }
-
+    
+    // 메인페이지 외의 다른 페이지에서의 검색 버튼 클릭 - 검색설정 가지고 메인으로 이동
+    @PostMapping("/search/withoutIndexPage")
+    public String searchWithoutIndex(RedirectAttributes redirectAttributes,
+                                     @ModelAttribute SearchWithoutIndexDTO searchOption){
+        System.out.println("searchOption = " + searchOption);
+        redirectAttributes.addFlashAttribute("takenSearchOption", searchOption);
+        return "redirect:/";
+    }
 
 }
