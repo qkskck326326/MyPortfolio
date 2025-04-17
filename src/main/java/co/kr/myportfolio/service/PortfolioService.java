@@ -19,6 +19,7 @@ public class PortfolioService {
     private PortfolioMapper portfolioMapper;
     
     // 포트폴리오 등록
+    @Transactional
     public int postPortfolio(PortfolioRequestDTO portfolioRequestDTO) {
         // Portfolio 객체 생성 후 값 대입
         Portfolio portfolio = new Portfolio();
@@ -42,6 +43,34 @@ public class PortfolioService {
         }
 
         return portfolioId;
+    }
+    
+    // 포트폴리오 수정
+    @Transactional
+    public void updatePortfolio(PortfolioRequestDTO portfolioRequestDTO) {
+        // Portfolio 객체 생성 후 값 대입
+        Portfolio portfolio = new Portfolio();
+        portfolio.setId(portfolioRequestDTO.getPortfolioId());
+        portfolio.setUserPid(portfolioRequestDTO.getUserPid());
+        portfolio.setThumbnail(portfolioRequestDTO.getThumbnail());
+        portfolio.setUserNickname(portfolioRequestDTO.getUserNickname());
+        portfolio.setContent(portfolioRequestDTO.getContent());
+        portfolio.setTitle(portfolioRequestDTO.getTitle());
+
+        // 포트폴리오 수정
+        portfolioMapper.updatePortfolio(portfolio);
+        
+        // 기존 테그 삭제
+        portfolioMapper.deleteTags(portfolioRequestDTO.getPortfolioId());
+        
+        // tags 리스트 저장
+        List<String> tags = portfolioRequestDTO.getTags();
+        if (tags != null && !tags.isEmpty()) {
+            Map<String, Object> param = new HashMap<>();
+            param.put("portfolioId", portfolioRequestDTO.getPortfolioId());
+            param.put("tags", tags);
+            portfolioMapper.insertTags(param);
+        }
     }
     
     // 특정 포트폴리오 정보 불러오기
@@ -76,4 +105,5 @@ public class PortfolioService {
     }
 
     public int getPortfolioTotalCount(Map<String, Object> params) { return portfolioMapper.getPortfolioTotalCount(params);}
+    
 }
