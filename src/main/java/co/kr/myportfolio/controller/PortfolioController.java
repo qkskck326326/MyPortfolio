@@ -5,12 +5,14 @@ import co.kr.myportfolio.dto.PortfolioRequestDTO;
 import co.kr.myportfolio.dto.PortfolioResponseDTO;
 import co.kr.myportfolio.dto.SearchWithoutIndexDTO;
 import co.kr.myportfolio.service.PortfolioService;
+import co.kr.myportfolio.vo.Portfolio;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpSession;
@@ -30,20 +32,31 @@ public class PortfolioController {
         return "portfolioForm";
     }
     
+    // 포트폴리오 수정 페이지 이동
+    @GetMapping("/update/{portfolioId}")
+    public String updatePortfolio(@PathVariable Integer portfolioId, Model model, HttpSession session) {
+        PortfolioResponseDTO portfolio = portfolioService.getPortfolio(portfolioId, 0);
+
+        // 세션에서 유저 정보 가져오기
+        int userPid = (int) session.getAttribute("user_pid");
+
+        if (userPid != portfolio.getPortfolio().getUserPid()) {
+            model.addAttribute("message", "권한이 없습니다.");
+            return "redirect:/portfolio/" + portfolioId;
+        }
+
+        model.addAttribute("portfolio", portfolio);
+        return "portfolioForm";
+    }
+    
     
     // 포트폴리오 등록
     @PostMapping("/post")
     public ResponseEntity<?> postPortfolio(@RequestBody PortfolioRequestDTO portfolioRequestDTO,
                                                              HttpSession session) {
-        System.out.println("등록 실행됨");
-
         // 세션에서 유저 정보 가져오기
         int userPid = (int) session.getAttribute("user_pid");
         String userNickname = (String) session.getAttribute("user_nickname");
-
-
-        System.out.println("userPid = " + userPid);
-        System.out.println("userNickName = " + userNickname);
 
         if (userPid == 0 || userNickname == null) {
             return ResponseEntity.badRequest().body("로그인이 필요합니다.");
@@ -53,16 +66,33 @@ public class PortfolioController {
         portfolioRequestDTO.setUserPid(userPid);
         portfolioRequestDTO.setUserNickname(userNickname);
 
-        System.out.println("portfolioRequestDTO = " + portfolioRequestDTO);
-
         int portfolioId = portfolioService.postPortfolio(portfolioRequestDTO);
 
         Map<String, Object> response = new HashMap<>();
         response.put("portfolioId", portfolioId);
         response.put("message", "프로젝트가 성공적으로 등록되었습니다!");
 
-        System.out.println("반환 직전");
         return ResponseEntity.ok(response); // JSON 형태로 응답
+    }
+
+    // 포트폴리오 수정
+    @PostMapping("/update")
+    public ResponseEntity<?> updatePortfolio(@RequestBody PortfolioRequestDTO portfolioRequestDTO,
+                                             HttpSession session) {
+        // 세션에서 유저 정보 가져오기
+        int userPid = (int) session.getAttribute("user_pid");
+        String userNickname = (String) session.getAttribute("user_nickname");
+
+        if (userPid == 0 || userNickname == null) {
+            return ResponseEntity.badRequest().body("로그인이 필요합니다.");
+        }
+
+        portfolioService.updatePortfolio(portfolioRequestDTO);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("portfolioId", portfolioRequestDTO.getPortfolioId());
+        response.put("message", "프로젝트가 성공적으로 수정되었습니다!");
+        return ResponseEntity.ok(response);
     }
 
     // 포트폴리오 카드 리스트 조회 -- 수정이나 주석처리 필요

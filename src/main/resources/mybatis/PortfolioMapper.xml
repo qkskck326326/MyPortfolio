@@ -9,6 +9,17 @@
         VALUES (#{userPid}, #{userNickname}, #{thumbnail}, #{title}, #{content}, NOW(), NOW());
     </insert>
 
+    <!-- 포트폴리오 수정 -->
+    <update id="updatePortfolio" parameterType="Portfolio">
+        UPDATE Portfolio
+        SET user_nickname = #{userNickname},
+            thumbnail = #{thumbnail},
+            title = #{title},
+            content = #{content},
+            updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
     <!--테그 저장-->
     <insert id="insertTags" parameterType="map">
         INSERT INTO Portfolio_Tags (portfolio_id, tag)
@@ -17,6 +28,12 @@
             (#{portfolioId}, #{tag})
         </foreach>
     </insert>
+
+    <!-- 기존 태그 삭제 -->
+    <delete id="deleteTags" parameterType="int">
+        DELETE FROM Portfolio_Tags
+        WHERE portfolio_id = #{portfolioId}
+    </delete>
 
     <!--포트폴리오 및 테그 반환을 위한 매핑-->
     <resultMap id="PortfolioResultMap" type="PortfolioResponseDTO">

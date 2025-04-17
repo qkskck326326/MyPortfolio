@@ -118,8 +118,8 @@
         <p>작성일: <fmt:formatDate value="${portfolio.createdAt}" pattern="yyyy년 MM월 dd일" /></p>
         <c:if test="${portfolio.userPid == sessionScope.user_pid}">
             <div class="actions">
-                <p>수정</p>
-                <p>삭제</p>
+                <p id="update-portfolio">수정</p>
+                <p id="delete-portfolio">삭제</p>
             </div>
         </c:if>
     </div>
@@ -157,6 +157,39 @@
         const portfolioId = "${portfolio.id}";
         <%--const markdownContent = `<c:out value='${portfolio.content}' escapeXml="true"/>`;--%>
         const markdownContent = document.getElementById("markdown-content").value;
+
+        const updateText = document.getElementById("update-portfolio");
+        const deleteText = document.getElementById("delete-portfolio");
+
+        updateText.addEventListener("click", function () {
+            location.href = `${pageContext.request.contextPath}/portfolio/update/${portfolioId}`;
+        });
+
+        deleteText.addEventListener("click", function () {
+            if (!confirm("정말 삭제하시겠습니까?")) return;
+
+            fetch(`${pageContext.request.contextPath}/portfolio/delete/${portfolioId}`, {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("삭제 실패");
+                    }
+                    return response.text(); // 혹은 .json()
+                })
+                .then(result => {
+                    alert("삭제되었습니다.");
+                    // 삭제 후 메인페이지나 목록으로 이동
+                    window.location.href = `${pageContext.request.contextPath}/portfolio/list`;
+                })
+                .catch(error => {
+                    console.error(error);
+                    alert("삭제 중 오류가 발생했습니다.");
+                });
+        });
 
         const viewer = new toastui.Editor.factory({
             el: document.querySelector('#viewer'),

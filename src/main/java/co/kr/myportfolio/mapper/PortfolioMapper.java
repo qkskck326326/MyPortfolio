@@ -12,7 +12,9 @@ import java.util.Map;
 @Mapper
 public interface PortfolioMapper {
     void insertPortfolio(Portfolio portfolio);
+    void updatePortfolio(Portfolio portfolio);
     void insertTags(Map<String, Object> param);
+    void deleteTags(int portfolioId);
 
     PortfolioResponseDTO getPortfolioAndTag(@Param("portfolioId") int portfolioId, @Param("userPid") int userPid);
 
@@ -32,4 +34,5 @@ public interface PortfolioMapper {
     List<PortfolioCardDTO> getPortfolioCardListWithSortBy(Map<String, Object> params);
 
     int getPortfolioTotalCount(Map<String, Object> params);
+
 }
