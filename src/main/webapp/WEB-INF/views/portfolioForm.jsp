@@ -111,6 +111,10 @@
 
 </div>
 
+<script id="portfolio-data" type="application/json">
+    <c:out value="${portfolioJson}" escapeXml="false" />
+</script>
+
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <!-- Toast UI Editor JS -->
@@ -118,6 +122,17 @@
 
 <script>
     let thumbnail = null;
+    let portfolioDTO = null;
+    console.log(portfolioDTO)
+
+    const portfolioDataElement = document.getElementById("portfolio-data");
+    if (portfolioDataElement) {
+        try {
+            portfolioDTO = JSON.parse(portfolioDataElement.textContent);
+        } catch (e) {
+            console.error("JSON 파싱 실패:", e);
+        }
+    }
 
     document.addEventListener("DOMContentLoaded", function () {
         const button = document.querySelector('.button-container button');
@@ -130,6 +145,16 @@
 
         // 전역 변수로 선언 (undefined 방지)
         window.tags = [];
+
+        // portfolio 존재시 대입
+        if (portfolioDTO) {
+            const portfolio = portfolioDTO.portfolio;
+            document.getElementById('title').value = portfolio.title;
+            editor.setMarkdown(portfolio.content);
+
+            window.tags = portfolioDTO.tags || [];
+            renderTags();
+        }
 
         // 태그 입력 이벤트 리스너
         tagInput.addEventListener('keydown', function (e) {
