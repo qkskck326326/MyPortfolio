@@ -6,6 +6,8 @@ import co.kr.myportfolio.dto.PortfolioResponseDTO;
 import co.kr.myportfolio.dto.SearchWithoutIndexDTO;
 import co.kr.myportfolio.service.PortfolioService;
 import co.kr.myportfolio.vo.Portfolio;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,18 +36,22 @@ public class PortfolioController {
     
     // 포트폴리오 수정 페이지 이동
     @GetMapping("/update/{portfolioId}")
-    public String updatePortfolio(@PathVariable Integer portfolioId, Model model, HttpSession session) {
-        PortfolioResponseDTO portfolio = portfolioService.getPortfolio(portfolioId, 0);
+    public String updatePortfolio(@PathVariable Integer portfolioId, Model model, HttpSession session) throws JsonProcessingException {
+        PortfolioResponseDTO portfolioDTO = portfolioService.getPortfolio(portfolioId, 0);
 
         // 세션에서 유저 정보 가져오기
         int userPid = (int) session.getAttribute("user_pid");
 
-        if (userPid != portfolio.getPortfolio().getUserPid()) {
+        if (userPid != portfolioDTO.getPortfolio().getUserPid()) {
             model.addAttribute("message", "권한이 없습니다.");
             return "redirect:/portfolio/" + portfolioId;
         }
 
-        model.addAttribute("portfolio", portfolio);
+        // JSON으로 변환해서 넘김
+        ObjectMapper mapper = new ObjectMapper();
+        String portfolioJson = mapper.writeValueAsString(portfolioDTO);
+
+        model.addAttribute("portfolioJson", portfolioJson);
         return "portfolioForm";
     }
     
