@@ -96,7 +96,11 @@
 </head>
 <body>
 <jsp:include page="/WEB-INF/views/common/header.jsp" />
-
+<c:if test="${not empty errorMessage}">
+    <script>
+        alert("${errorMessage}");
+    </script>
+</c:if>
 <p id="search-info" style="text-align: center; font-weight: bold; margin: 20px 0;"></p>
 <div id="cardContainer" class="card-container"></div>
 
@@ -154,7 +158,7 @@
                             <div class="date">\${createdAt}</div>
                             <hr>
                             <div class="bottom">
-                                <span class="nickname" data-user="\${card.userNickname}">작성자. \${card.userNickname}</span>
+                                <span class="nickname" data-user="\${card.userNickname}">by. \${card.userNickname}</span>
                                 <span class="like">❤️ \${card.likeCount}</span>
                             </div>
                         </div>

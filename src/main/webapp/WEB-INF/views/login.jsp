@@ -30,6 +30,11 @@
 
 </head>
 <body>
+<c:if test="${not empty errorMessage}">
+    <script>
+        alert("${errorMessage}");
+    </script>
+</c:if>
 <div>
     <jsp:include page="/WEB-INF/views/common/header.jsp" />
 </div>
