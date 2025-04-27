@@ -14,6 +14,9 @@ public class User {
     private int userPid;
     private String userId;
     private String password;
+    private String userThumbnail;
+    private String email;
+    private String github;
     private String nickname;
     private Date birth;
     private String introduce;
