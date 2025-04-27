@@ -33,6 +33,22 @@ public class UserController {
     public String signup() {
         return "register";
     }
+
+    // 페이지 이동 - 회원정보 페이지
+    @GetMapping("/info")
+    public String goUserInfo(Model model, HttpSession session) {
+        // 세션에서 유저 정보 가져오기
+        Integer userPid = (Integer) session.getAttribute("user_pid");
+
+        if (userPid == null) {
+            model.addAttribute("errorMessage", "로그인이 필요합니다.");
+            return "redirect:/login";
+        }else {
+            model.addAttribute("user_pid", userPid);
+
+            return "userInfo";
+        }
+    }
     
     // API - 회원가입
     @PostMapping("/register")
