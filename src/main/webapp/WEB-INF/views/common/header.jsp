@@ -144,7 +144,6 @@
         max-height: 200px; /* 태그 많아질 경우 대비 */
         overflow-y: auto;
     }
-
 </style>
 
 <%-- 옵션 전달받았을 경우 --%>
@@ -208,30 +207,44 @@
         <div id="search-btn" class="search-btn">검색</div>
 
 
-        <!-- 로그인 버튼 -->
+        <!-- 로그인 했을 시 -->
         <c:choose>
             <c:when test="${not empty sessionScope.user_nickname}">
-                <!-- 사용자 정보 및 로그아웃 버튼 -->
-                <div class="user-info d-flex align-items-center bg-light p-2 rounded">
-                    <i class="bi bi-person-circle fs-4 text-primary me-2"></i>
-                    <span class="fw-bold text-primary me-3">${sessionScope.user_nickname} 님</span>
+                <!-- 작성 버튼 -->
+                <button class="btn btn-success fw-bold px-3 py-2"
+                        onclick="location.href='${pageContext.request.contextPath}/portfolio/new'">
+                    <i class="bi bi-pencil-square me-1"></i> 프로젝트 작성
+                </button>
 
-                    <!-- 작성 버튼 -->
-                    <button class="btn btn-success fw-bold px-3 py-2"
-                            onclick="location.href='${pageContext.request.contextPath}/portfolio/new'">
-                        <i class="bi bi-pencil-square me-1"></i> 프로젝트 작성
+                <!-- 사용자 닉네임 버튼 -->
+                <button id="nicknameBtn" class="btn btn-outline-primary fw-bold px-3 py-2 d-flex align-items-center">
+                    <i class="bi bi-person-circle me-2"></i> ${sessionScope.user_nickname}
+                    <i class="bi bi-caret-down-fill ms-2"></i>
+                </button>
+
+                <!-- 드롭다운 메뉴 (처음엔 숨겨져 있음) -->
+                <div id="userDropdownMenu" class="bg-white border rounded shadow-sm p-2 d-none"
+                     style="position: fixed; top: 80px; right: 20px; z-index: 1050;">
+                    <button id="myInfoBtn" class="btn btn-outline-secondary w-100 mb-1 d-flex align-items-center">
+                        <i class="bi bi-person me-2"></i> 내 정보
                     </button>
-                    &nbsp;
-                    <button id="logoutBtn" class="btn btn-danger px-3 py-2 d-flex align-items-center">
-                        <i class="bi bi-box-arrow-right me-1"></i> 로그아웃
+                    <button id="personalBtn" class="btn btn-outline-secondary w-100 mb-1 d-flex align-items-center">
+                        <i class="bi bi-house me-2"></i> 내 페이지
+                    </button>
+                    <button id="likedPostBtn" class="btn btn-outline-secondary w-100 mb-1 d-flex align-items-center">
+                        <i class="bi bi-heart me-2"></i> 관심 표시한 글
+                    </button>
+                    <button id="logoutBtn" class="btn btn-outline-danger w-100 d-flex align-items-center">
+                        <i class="bi bi-box-arrow-right me-2"></i> 로그아웃
                     </button>
                 </div>
 
-                <!-- Bootstrap Icons 추가 -->
+                <!-- Bootstrap Icons -->
                 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
 
             </c:when>
             <c:otherwise>
+                <%--로그인 버튼--%>
                 <button class="login-btn" onclick="location.href='${pageContext.request.contextPath}/login'">로그인
                 </button>
             </c:otherwise>
@@ -271,25 +284,57 @@
         const tagUI = document.getElementById("tag-ui");
         const tagInput = document.getElementById("tag-input-header");
 
+        const nicknameBtn = document.getElementById("nicknameBtn");
+        const dropdownMenu = document.getElementById("userDropdownMenu");
 
-        // 로그아웃 버튼 클릭 시 로그아웃 모달 띄우기
-        const logoutBtn = document.getElementById("logoutBtn");
-        if (logoutBtn) {
-            logoutBtn.addEventListener("click", function () {
-                showLogoutModal();
+        if(${sessionScope.user_pid != null}){
+            // 내 정보 페이지 이동
+            document.getElementById("myInfoBtn").addEventListener("click", function () {
+                location.href = "${pageContext.request.contextPath}/user/info";
             });
-        }
 
-        // 확인 버튼 클릭 시 메인 페이지로 이동
-        const logoutConfirmBtn = document.getElementById("logoutConfirmBtn");
-        if (logoutConfirmBtn) {
-            logoutConfirmBtn.addEventListener("click", function () {
-                $.post("${pageContext.request.contextPath}/logout", function (res) {
-                    if (res.status === "success") {
-                        location.reload();
-                    }
+            // 내 페이지 이동
+            document.getElementById("personalBtn").addEventListener("click", function () {
+                location.href = "${pageContext.request.contextPath}/personal/${sessionScope.user_id}";
+            });
+
+            // 관심 표시한 글 이동
+            document.getElementById("likedPostBtn").addEventListener("click", function () {
+                location.href = "${pageContext.request.contextPath}/personal/liked";
+            });
+
+            // 닉네임 버튼 클릭시 메뉴 보이게
+            nicknameBtn.addEventListener("click", function () {
+                dropdownMenu.classList.toggle("d-none");
+            });
+
+            // 바깥 클릭 시 드롭다운 닫기
+            document.addEventListener("click", function (e) {
+                if (!nicknameBtn.contains(e.target) && !dropdownMenu.contains(e.target)) {
+                    dropdownMenu.classList.add("d-none");
+                }
+            });
+
+
+            // 로그아웃 버튼 클릭 시 로그아웃 모달 띄우기
+            const logoutBtn = document.getElementById("logoutBtn");
+            if (logoutBtn) {
+                logoutBtn.addEventListener("click", function () {
+                    showLogoutModal();
                 });
-            });
+            }
+
+            // 로그아웃 확인 버튼 클릭 시 메인 페이지로 이동
+            const logoutConfirmBtn = document.getElementById("logoutConfirmBtn");
+            if (logoutConfirmBtn) {
+                logoutConfirmBtn.addEventListener("click", function () {
+                    $.post("${pageContext.request.contextPath}/logout", function (res) {
+                        if (res.status === "success") {
+                            location.reload();
+                        }
+                    });
+                });
+            }
         }
 
         // 검색 기준 변경 시 UI 전환
