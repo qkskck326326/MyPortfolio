@@ -1,10 +1,14 @@
 package co.kr.myportfolio.service;
 
 
+import co.kr.myportfolio.dto.UserRequestDTO;
 import co.kr.myportfolio.mapper.UserMapper;
 import co.kr.myportfolio.vo.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class UserService {
@@ -39,11 +43,22 @@ public class UserService {
         return userMapper.checkUserIdExists(nickname);
     }
 
-    public void updateUser(User user) {
-        userMapper.updateUser(user);
-    }
-
     public void deleteUser(int id) {
         userMapper.deleteUser(id);
+    }
+
+    public void updateUserThumbnail(Map<String, Object> param) {
+        userMapper.updateUserThumbnail(param);
+    }
+
+    public void updateUserInfo(Integer userPid, UserRequestDTO requestDTO) {
+        Map<String, Object> param = new HashMap<>();
+        param.put("userPid", userPid);
+        param.put("nickname", requestDTO.getNickname());
+        param.put("email", requestDTO.getEmail());
+        param.put("github", requestDTO.getGithub());
+        param.put("introduce", requestDTO.getIntroduce());
+
+        userMapper.updateUserInfo(param);
     }
 }

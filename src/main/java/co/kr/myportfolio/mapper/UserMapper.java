@@ -4,6 +4,8 @@ package co.kr.myportfolio.mapper;
 import co.kr.myportfolio.vo.User;
 import org.apache.ibatis.annotations.*;
 
+import java.util.Map;
+
 @Mapper
 public interface UserMapper {
     
@@ -27,4 +29,9 @@ public interface UserMapper {
     
     // 아이디 중복 체크
     boolean checkUserIdExists(String nickname);
+    
+    // 썸네일 변경
+    void updateUserThumbnail(Map<String, Object> param);
+
+    void updateUserInfo(Map<String, Object> param);
 }

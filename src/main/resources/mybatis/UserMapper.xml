@@ -9,7 +9,7 @@
         VALUES (#{userId}, #{password}, #{nickname}, #{birth}, #{introduce});
     </insert>
 
-    <!-- 사용자 조회 (ID로 검색) -->
+    <!-- 사용자 조회 (PID로 검색) -->
     <select id="getUserById" resultType="User" parameterType="int">
         SELECT * FROM User WHERE user_id = #{user_id};
     </select>
@@ -30,10 +30,21 @@
     </select>
 
     <!-- 사용자 정보 수정 -->
-    <update id="updateUser" parameterType="User">
+    <update id="updateUserInfo">
         UPDATE User
-        SET password = #{password}, nickname = #{nickname}, birth = #{birth}, introduce = #{introduce}
-        WHERE user_id = #{userId};
+        SET
+            nickname = #{nickname},
+            email = #{email},
+            github = #{github},
+            introduce = #{introduce}
+        WHERE user_pid = #{userPid}
+    </update>
+
+    <!-- 유저 썸네임 수정 -->
+    <update id="updateUserThumbnail">
+        UPDATE User
+        SET user_thumbnail = #{thumbnail}
+        WHERE user_pid = #{userPid};
     </update>
 
     <!-- 사용자 삭제 -->
