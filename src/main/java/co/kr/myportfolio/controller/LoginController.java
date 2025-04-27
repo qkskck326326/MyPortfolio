@@ -39,9 +39,9 @@ public class LoginController {
         if (user != null && passwordEncoder.matches(password, user.getPassword())) {
             result.put("status", "success");
             session.setAttribute("user_pid", user.getUserPid());
-            System.out.println("user.getPid() = " + user.getUserPid());
             session.setAttribute("user_id", user.getUserId());
             session.setAttribute("user_nickname", user.getNickname());
+            session.setAttribute("user_thumbnail", user.getUserThumbnail());
         } else {
             result.put("status", "fail");
             result.put("message", "아이디 또는 비밀번호를 확인해주세요.");
