@@ -96,7 +96,7 @@
         ORDER BY p.created_at DESC
     </select>
 
-    <!--포트폴리오 전체 갯수 반환-->
+    <!--포트폴리오 전체 갯수 반환) 검색어 or 테그-->
     <select id="getPortfolioTotalCount" parameterType="map" resultType="int">
         SELECT COUNT(*)
         FROM Portfolio p
@@ -117,7 +117,7 @@
     </select>
 
 
-    <!--무한스크롤 - 카드 리스트 반환 + 정렬기준-->
+    <!--무한스크롤 - 검색) 카드 리스트 반환 + 정렬기준-->
     <select id="getPortfolioCardListWithSortBy" parameterType="map" resultType="PortfolioCardDTO">
         SELECT
         p.id AS portfolioId,
@@ -142,6 +142,40 @@
         <if test="keyword != null and keyword != ''">
             AND p.title LIKE CONCAT('%', #{keyword}, '%')
         </if>
+        ORDER BY
+        <choose>
+            <when test="orderBy == 'popular'">
+                p.like_count DESC
+            </when>
+            <otherwise>
+                p.created_at DESC
+            </otherwise>
+        </choose>
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <!--포트폴리오 전체 갯수 반환) 좋아요 표시한 게시글-->
+    <select id="getLikedPortfolioTotalCount" parameterType="int" resultType="int">
+        SELECT COUNT(*)
+        FROM User_Portfolio_Like
+        WHERE user_pid = #{userPid}
+    </select>
+
+
+    <!--무한스크롤 - 좋아요 표시한 게시글) 카드 리스트 반환 + 정렬기준-->
+    <select id="getLikedPortfolioCardListWithSortBy" parameterType="map" resultType="PortfolioCardDTO">
+        SELECT
+        p.id AS portfolioId,
+        p.user_pid AS userPid,
+        p.like_count AS likeCount,
+        p.thumbnail AS thumbnail,
+        p.title AS portfolioTitle,
+        p.user_nickname AS userNickname,
+        p.created_at AS createdAt
+        FROM Portfolio p
+        INNER JOIN User_Portfolio_Like upl
+        ON p.id = upl.portfolio_id
+        WHERE upl.user_pid = #{userPid}
         ORDER BY
         <choose>
             <when test="orderBy == 'popular'">

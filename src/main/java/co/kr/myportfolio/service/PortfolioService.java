@@ -104,6 +104,11 @@ public class PortfolioService {
         return portfolioMapper.getPortfolioCardListWithSortBy(params);
     }
 
+    public List<PortfolioCardDTO> getLikedPortfolioCardListWithSortBy(Map<String, Object> params) {
+        return portfolioMapper.getLikedPortfolioCardListWithSortBy(params);
+    }
+
     public int getPortfolioTotalCount(Map<String, Object> params) { return portfolioMapper.getPortfolioTotalCount(params);}
-    
+
+    public int getLikedPortfolioTotalCount(Map<String, Object> params) { return portfolioMapper.getLikedPortfolioTotalCount(params);}
 }

@@ -33,6 +33,9 @@ public interface PortfolioMapper {
 
     List<PortfolioCardDTO> getPortfolioCardListWithSortBy(Map<String, Object> params);
 
+    List<PortfolioCardDTO> getLikedPortfolioCardListWithSortBy(Map<String, Object> params);
+
     int getPortfolioTotalCount(Map<String, Object> params);
 
+    int getLikedPortfolioTotalCount(Map<String, Object> params);
 }

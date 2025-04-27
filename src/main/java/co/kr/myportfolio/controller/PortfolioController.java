@@ -5,7 +5,6 @@ import co.kr.myportfolio.dto.PortfolioRequestDTO;
 import co.kr.myportfolio.dto.PortfolioResponseDTO;
 import co.kr.myportfolio.dto.SearchWithoutIndexDTO;
 import co.kr.myportfolio.service.PortfolioService;
-import co.kr.myportfolio.vo.Portfolio;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpSession;
@@ -144,6 +142,38 @@ public class PortfolioController {
         // 첫 번째 요청일 경우에만 totalCount 포함
         if (page == 0) {
             int totalCount = portfolioService.getPortfolioTotalCount(params);
+            response.put("totalCount", totalCount);
+        }
+
+        return ResponseEntity.ok(response);
+    }
+    
+    // 좋아요 표시한 게시글 보기
+    @GetMapping("/liked/list")
+    @ResponseBody
+    public ResponseEntity<?> getLikedPortfoliosWithPaging(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "latest") String orderBy,
+            @RequestParam int userPid
+    )
+    {
+        int offset = page * size;
+        Map<String, Object> params = new HashMap<>();
+        params.put("offset", offset);
+        params.put("limit", size);
+        params.put("orderBy", orderBy);
+        params.put("userPid", userPid);
+
+        List<PortfolioCardDTO> portfolioCardList = portfolioService.getLikedPortfolioCardListWithSortBy(params);///
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("portfolioCardList", portfolioCardList);
+        response.put("message", "프로젝트 카드 리스트 불러옴");
+
+        // 첫 번째 요청일 경우에만 totalCount 포함
+        if (page == 0) {
+            int totalCount = portfolioService.getLikedPortfolioTotalCount(params);
             response.put("totalCount", totalCount);
         }
 
