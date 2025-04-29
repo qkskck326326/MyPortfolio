@@ -218,7 +218,16 @@
 
                 <!-- 사용자 닉네임 버튼 -->
                 <button id="nicknameBtn" class="btn btn-outline-primary fw-bold px-3 py-2 d-flex align-items-center">
-                    <i class="bi bi-person-circle me-2"></i> ${sessionScope.user_nickname}
+                    <c:choose>
+                        <c:when test="${not empty sessionScope.user_thumbnail}">
+                            <img src="${sessionScope.user_thumbnail}" alt="프로필 이미지"
+                                 style="width:24px; height:24px; border-radius:50%; object-fit:cover;">
+                        </c:when>
+                        <c:otherwise>
+                            <i class="bi bi-person-circle me-2"></i>
+                        </c:otherwise>
+                    </c:choose>
+                        ${sessionScope.user_nickname}
                     <i class="bi bi-caret-down-fill ms-2"></i>
                 </button>
 
