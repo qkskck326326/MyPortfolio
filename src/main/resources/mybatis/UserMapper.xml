@@ -5,8 +5,8 @@
 
     <!-- 사용자 등록 -->
     <insert id="insertUser" parameterType="User">
-        INSERT INTO User (user_id, password, nickname, birth, introduce)
-        VALUES (#{userId}, #{password}, #{nickname}, #{birth}, #{introduce});
+        INSERT INTO User (user_id, password, nickname, birth, introduce, github, email, user_thumbnail)
+        VALUES (#{userId}, #{password}, #{nickname}, #{birth}, #{introduce}, #{github}, #{email}, #{userThumbnail});
     </insert>
 
     <!-- 사용자 조회 (PID로 검색) -->
