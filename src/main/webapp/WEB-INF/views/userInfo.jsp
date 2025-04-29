@@ -28,7 +28,11 @@
         <div class="id-info">
             <p><strong>닉네임:</strong>
                 <span id="userNicknameView"></span>
+            <div class="d-flex">
                 <input type="text" id="userNicknameInput" class="form-control d-none">
+                <button type="button" id="nicknameCheckBtn" class="btn btn-outline-secondary btn-sm d-none ms-2" style="white-space: nowrap; min-width: 80px;">중복검사</button>
+        </div>
+            <div id="nicknameCheckResult" class="mt-1" style="font-size:14px;"></div>
             </p>
             <p><strong>Email:</strong>
                 <span id="userEmailView"></span>
@@ -53,7 +57,7 @@
 <div class="text-center mt-3 edit-actions">
     <button id="startEditThumbnailBtn" class="btn btn-primary me-2">📸 썸네일 수정</button>
     <button id="startEditInfoBtn" class="btn btn-warning">✏️ 정보 수정</button>
-    <button id="confirmInfoEditBtn" class="btn btn-success d-none">저장</button>
+    <button id="confirmInfoEditBtn" class="btn btn-success d-none" disabled>저장</button> <!-- 처음부터 비활성화 -->
     <button id="cancelInfoEditBtn" class="btn btn-secondary d-none">취소</button>
 </div>
 
@@ -68,20 +72,20 @@
 
 <script src="${pageContext.request.contextPath}/resources/js/jquery-3.6.0.js"></script>
 <script>
-    let userInfo = {};
-    let uploadedThumbnailUrl = "";
-    const imgbbApiKey = "a714e7f73bc8a242a9218c35c7b75e9e";
-
-    // 날짜 포맷팅 함수
-    function formatDate(dateInput) {
-        const date = new Date(dateInput);
-        const year = date.getFullYear();
-        const month = ('0' + (date.getMonth() + 1)).slice(-2);
-        const day = ('0' + date.getDate()).slice(-2);
-        return year + "년 " + month + "월 " + day + "일"
-    }
-
     $(document).ready(function() {
+        let userInfo = {};
+        let uploadedThumbnailUrl = "";
+        let isNicknameChecked = false; // 닉네임 중복검사 통과 여부
+
+        // 날짜 포맷팅 함수
+        function formatDate(dateInput) {
+            const date = new Date(dateInput);
+            const year = date.getFullYear();
+            const month = ('0' + (date.getMonth() + 1)).slice(-2);
+            const day = ('0' + date.getDate()).slice(-2);
+            return year + "년 " + month + "월 " + day + "일";
+        }
+
         // 유저 정보 불러오기
         $.ajax({
             url: "${pageContext.request.contextPath}/user/get/myInfo",
@@ -91,12 +95,13 @@
                 $("#userNicknameView").text(data.nickname);
                 $("#userEmailView").text(data.email || "-");
                 $("#userGithubView").text(data.github || "-");
-                // 생년월일 포맷 적용
+
                 if (data.birth) {
                     $("#userBirth").text(formatDate(data.birth));
                 } else {
                     $("#userBirth").text("-");
                 }
+
                 $("#userIntroduceView").text(data.introduce || "없음");
 
                 if (data.userThumbnail) {
@@ -105,7 +110,6 @@
                     $("#userThumbnail").html('<img src="https://via.placeholder.com/140x180?text=No+Image">');
                 }
 
-                // 깃허브 버튼 기능
                 if (data.github && data.github.trim() !== "") {
                     $("#goGithubBtn").click(function() {
                         window.open(data.github, "_blank");
@@ -120,22 +124,74 @@
         $("#startEditInfoBtn").click(function() {
             $("#userNicknameView, #userEmailView, #userGithubView, #userIntroduceView").hide();
             $("#userNicknameInput, #userEmailInput, #userGithubInput, #userIntroduceInput, #introduceCount").removeClass("d-none");
+            $("#nicknameCheckBtn").removeClass("d-none");
 
             $("#userNicknameInput").val(userInfo.nickname);
             $("#userEmailInput").val(userInfo.email);
             $("#userGithubInput").val(userInfo.github);
             $("#userIntroduceInput").val(userInfo.introduce);
-
             $("#introduceCount").text(`${userInfo.introduce.length} / 1000`);
 
-            $("#startEditInfoBtn").hide();
+            $("#startEditInfoBtn, #goGithubBtn").hide();
             $("#confirmInfoEditBtn, #cancelInfoEditBtn").removeClass("d-none");
+            $("#confirmInfoEditBtn").prop("disabled", true); // 저장버튼 비활성화
         });
 
+        // 닉네임 입력 시 저장버튼 비활성화 + 중복검사 필요 알림
+        $("#userNicknameInput").on("input", function() {
+            isNicknameChecked = false;
+            $("#confirmInfoEditBtn").prop("disabled", true);
+            $("#nicknameCheckResult")
+                .text("중복 검사가 필요합니다.")
+                .removeClass("text-success text-danger")
+                .addClass("text-warning");
+        });
+
+        // 닉네임 중복검사
+        $("#nicknameCheckBtn").click(function() {
+            const nickname = $("#userNicknameInput").val().trim();
+
+            if (nickname === "") {
+                $("#nicknameCheckResult").text("닉네임을 입력하세요.").removeClass("text-success").addClass("text-danger");
+                return;
+            }
+
+            $.ajax({
+                url: "${pageContext.request.contextPath}/user/nickname/exist",
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({ nickname: nickname }),
+                success: function(isExist) {
+                    if (isExist) {
+                        $("#nicknameCheckResult")
+                            .text("이미 사용 중인 닉네임입니다.")
+                            .removeClass("text-success text-warning")
+                            .addClass("text-danger");
+                        $("#confirmInfoEditBtn").prop("disabled", true);
+                    } else {
+                        $("#nicknameCheckResult")
+                            .text("사용 가능한 닉네임입니다.")
+                            .removeClass("text-danger text-warning")
+                            .addClass("text-success");
+                        $("#confirmInfoEditBtn").prop("disabled", false);
+                        isNicknameChecked = true;
+                    }
+                },
+                error: function() {
+                    $("#nicknameCheckResult")
+                        .text("중복 검사 중 오류가 발생했습니다.")
+                        .removeClass("text-success text-warning")
+                        .addClass("text-danger");
+                }
+            });
+        });
+
+        // 소개글 입력 시 글자수 카운트
         $("#userIntroduceInput").on("input", function() {
             $("#introduceCount").text($(this).val().length + " / 1000");
         });
 
+        // 저장 버튼 클릭 (정보 업데이트)
         $("#confirmInfoEditBtn").click(function() {
             const updatedData = {
                 nickname: $("#userNicknameInput").val(),
@@ -161,7 +217,7 @@
 
         $("#cancelInfoEditBtn").click(() => location.reload());
 
-        // 썸네일 수정 로직
+        // 썸네일 수정 로직 (기존 유지)
         $("#startEditThumbnailBtn").click(() => $("#editThumbnailSection").slideDown());
 
         $("#thumbnailUpload").on("change", function(event) {
@@ -172,7 +228,7 @@
             formData.append('image', file);
 
             $.ajax({
-                url: "https://api.imgbb.com/1/upload?key=" + imgbbApiKey,
+                url: "https://api.imgbb.com/1/upload?key=a714e7f73bc8a242a9218c35c7b75e9e",
                 type: "POST",
                 processData: false,
                 contentType: false,
