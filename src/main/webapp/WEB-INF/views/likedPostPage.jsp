@@ -175,6 +175,15 @@
             }, 200);  // 200ms 딜레이로 throttle 효과
         });
 
+        // 닉네임 클릭 시 해당 사용자 페이지 이동
+        $(document).on('click', '.nickname', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const userPid = $(this).data('user_pid');
+            console.log(`작성자 아이디 클릭:` + userPid);
+            location.href = "${pageContext.request.contextPath}/personal/" + userPid;
+        });
+
         // 최초 호출
         loadPortfolios();
     });
