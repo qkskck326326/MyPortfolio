@@ -238,7 +238,7 @@
                         <i class="bi bi-person me-2"></i> 내 정보
                     </button>
                     <button id="personalBtn" class="btn btn-outline-secondary w-100 mb-1 d-flex align-items-center">
-                        <i class="bi bi-house me-2"></i> 내 페이지
+                        <i class="bi bi-house me-2"></i> 내 포트폴리오
                     </button>
                     <button id="likedPostBtn" class="btn btn-outline-secondary w-100 mb-1 d-flex align-items-center">
                         <i class="bi bi-heart me-2"></i> 관심 표시한 글
@@ -302,9 +302,9 @@
                 location.href = "${pageContext.request.contextPath}/user/info";
             });
 
-            // 내 페이지 이동
+            // 내 포트폴리오 페이지 이동
             document.getElementById("personalBtn").addEventListener("click", function () {
-                location.href = "${pageContext.request.contextPath}/personal/${sessionScope.user_id}";
+                location.href = "${pageContext.request.contextPath}/personal/${sessionScope.user_pid}";
             });
 
             // 관심 표시한 글 이동
