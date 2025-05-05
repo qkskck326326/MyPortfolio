@@ -1,8 +1,6 @@
 package co.kr.myportfolio.service;
 
-import co.kr.myportfolio.dto.PortfolioCardDTO;
-import co.kr.myportfolio.dto.PortfolioRequestDTO;
-import co.kr.myportfolio.dto.PortfolioResponseDTO;
+import co.kr.myportfolio.dto.*;
 import co.kr.myportfolio.mapper.PortfolioMapper;
 import co.kr.myportfolio.vo.Portfolio;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,12 +27,13 @@ public class PortfolioService {
         portfolio.setContent(portfolioRequestDTO.getContent());
         portfolio.setTitle(portfolioRequestDTO.getTitle());
 
+        // tags 리스트 저장
+        List<String> tags = portfolioRequestDTO.getTags();
+
         // MyBatis에서 자동 생성된 ID를 반환 객체에 설정
         portfolioMapper.insertPortfolio(portfolio);
         int portfolioId = portfolio.getId();
 
-        // tags 리스트 저장
-        List<String> tags = portfolioRequestDTO.getTags();
         if (tags != null && !tags.isEmpty()) {
             Map<String, Object> param = new HashMap<>();
             param.put("portfolioId", portfolioId);
@@ -111,4 +110,16 @@ public class PortfolioService {
     public int getPortfolioTotalCount(Map<String, Object> params) { return portfolioMapper.getPortfolioTotalCount(params);}
 
     public int getLikedPortfolioTotalCount(Map<String, Object> params) { return portfolioMapper.getLikedPortfolioTotalCount(params);}
+
+    public List<TagDTO> getUsersTags(int userPid) {
+        return portfolioMapper.getUsersTags(userPid);
+    }
+
+    public List<PersonalPortfolioDTO> getPersonalPortfolio(Map<String, Object> params) {
+        return portfolioMapper.getPersonalPortfolio(params);
+    }
+
+    public int getPersonalPortfolioTotalCount(Map<String, Object> params) {
+        return portfolioMapper.getPersonalPortfolioTotalCount(params);
+    }
 }
