@@ -19,15 +19,17 @@
 
         /* 개별 카드 */
         .card {
-            width: calc((100% - 60px) / 4);  /* 4열 기준 */
+            width: calc((100% - 60px) / 4); /* gap 20px * (4 - 1) */
             border: 1px solid #ddd;
             border-radius: 12px;
             overflow: hidden;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            font-family: sans-serif;
             background: #fff;
+            box-sizing: border-box;
             display: flex;
             flex-direction: column;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            transition: all 0.5s ease;
         }
 
         .card:hover {
@@ -50,20 +52,41 @@
             display: block;
         }
 
-        /* 카드 내용 */
         .content {
+            flex: 1;
             padding: 12px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
         }
 
-        /* 제목 */
+
         .title {
             font-size: 1.1rem;
             font-weight: bold;
             margin-bottom: 4px;
             text-align: left;
+        }
+
+        .date {
+            font-size: 0.85rem;
+            color: gray;
+            text-align: left;
+        }
+
+        .bottom {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+
+        .nickname {
+            font-weight: 500;
+        }
+
+        .like {
+            color: #e74c3c;
         }
 
         .hidden {
@@ -118,7 +141,7 @@
                             <div class="date">\${createdAt}</div>
                             <hr>
                             <div class="bottom">
-                                <span class="nickname" data-user="\${card.userNickname}">작성자. \${card.userNickname}</span>
+                                <span class="nickname" data-user_pid="\${card.userPid}">by. \${card.userNickname}</span>
                                 <span class="like">❤️ \${card.likeCount}</span>
                             </div>
                         </div>
