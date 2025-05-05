@@ -195,7 +195,7 @@
             });
         }
 
-        // AJAX 요청 (버튼 클릭 이벤트)
+        // AJAX 요청 (프로젝트 등록)
         // 버튼 클릭 이벤트 함수
         function handleButtonClick(e) {
             e.preventDefault();
@@ -214,6 +214,12 @@
                 return;
             }
 
+            const rawTags = window.tags ? window.tags.join(',') : "";
+            const tagList = rawTags
+                .split(",")
+                .map(t => t.trim())
+                .filter(t => t.length > 0); // 공백 테그 제거
+
             $.ajax({
                 type: "POST",
                 url: "${pageContext.request.contextPath}/portfolio/post",
@@ -222,7 +228,7 @@
                     title: title,
                     content: content,
                     thumbnail : thumbnail,
-                    tags: tags.split(",")
+                    tags: tagList
                 }),
                 success: function (response) {
                     alert(response.message); // 서버에서 보낸 메시지 출력
