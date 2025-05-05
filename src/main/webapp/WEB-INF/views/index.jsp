@@ -141,7 +141,7 @@
         // 포트폴리오 카드 HTML을 생성해서 목록에 추가
         function renderPortfolioCards(data) {
             const cardList = data.portfolioCardList;
-            const $container = $('#cardContainer');
+            const container = $('#cardContainer');
             const defaultThumbnail = '${pageContext.request.contextPath}/resources/images/logo.webp';
 
             cardList.forEach(card => {
@@ -158,13 +158,13 @@
                             <div class="date">\${createdAt}</div>
                             <hr>
                             <div class="bottom">
-                                <span class="nickname" data-user="\${card.userNickname}">by. \${card.userNickname}</span>
+                                <span class="nickname" data-user_pid="\${card.userPid}">by. \${card.userNickname}</span>
                                 <span class="like">❤️ \${card.likeCount}</span>
                             </div>
                         </div>
                     </a>
                 `;
-                $container.append(html);
+                container.append(html);
             });
         }
 
