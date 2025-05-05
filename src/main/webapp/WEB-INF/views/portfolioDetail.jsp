@@ -106,13 +106,22 @@
         .actions p:hover {
             color: gray;
         }
+        .nickname {
+            cursor: pointer;
+            color: black; /* 파란색 계열 */
+        }
+
+        .nickname:hover {
+            text-decoration: underline;
+            color: #007bff; /* hover 시 더 진한 파란색 */
+        }
     </style>
 </head>
 <body>
 <jsp:include page="/WEB-INF/views/common/header.jsp" />
 <div class="portfolio-container">
     <h1>${portfolio.title}</h1>
-    <p>작성자 : ${portfolio.userNickname}</p>
+    <p class="nickname">작성자 : ${portfolio.userNickname}</p>
 
     <div class="info-container">
         <p>작성일: <fmt:formatDate value="${portfolio.createdAt}" pattern="yyyy년 MM월 dd일" /></p>
@@ -155,11 +164,19 @@
     <script>
         const userPid = "${sessionScope.user_pid}";
         const portfolioId = "${portfolio.id}";
-        <%--const markdownContent = `<c:out value='${portfolio.content}' escapeXml="true"/>`;--%>
         const markdownContent = document.getElementById("markdown-content").value;
 
         const updateText = document.getElementById("update-portfolio");
         const deleteText = document.getElementById("delete-portfolio");
+
+        // 닉네임 클릭 시 사용자 페이지 이동
+        $(document).on('click', '.nickname', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const userPid = ${portfolio.userPid};
+            console.log(`작성자 아이디 클릭:` + userPid);
+            location.href = "${pageContext.request.contextPath}/personal/" + userPid;
+        });
 
         if (updateText) {
             updateText.addEventListener("click", function () {
