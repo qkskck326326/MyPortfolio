@@ -188,6 +188,86 @@
         LIMIT #{limit} OFFSET #{offset}
     </select>
 
+    <!-- 특정 유저가 사용한 모든 태그와 각 태그의 사용 횟수 -->
+    <select id="getUsersTags" parameterType="int" resultType="TagDTO">
+        SELECT pt.tag AS tagName, COUNT(*) AS amount
+        FROM Portfolio_Tags pt
+                 INNER JOIN Portfolio p ON pt.portfolio_id = p.id
+        WHERE p.user_pid = #{userPid}
+        GROUP BY pt.tag
+        ORDER BY amount DESC
+    </select>
+
+    <!--특정유저 포트폴리오 resultMap-->
+    <resultMap id="personalPortfolioMap" type="PersonalPortfolioDTO">
+        <id property="portfolioId" column="id"/>
+        <result property="portfolioTitle" column="title"/>
+        <result property="portfolioThumbnail" column="thumbnail"/>
+        <result property="likeCount" column="like_count"/>
+        <result property="createAt" column="created_at"/>
+        <collection property="tags" ofType="string"
+                    select="findTagsByPortfolioId" column="id"/>
+    </resultMap>
+
+    <!--서브쿼리 - 포트폴리오 ID로 태그 조회-->
+    <select id="findTagsByPortfolioId" resultType="string" parameterType="int">
+        SELECT tag FROM Portfolio_Tags WHERE portfolio_id = #{portfolioId}
+    </select>
+
+    <!--특정 유저 작성 포트폴리오들 반환 ※-->
+    <select id="getPersonalPortfolio" resultMap="personalPortfolioMap" parameterType="map" >
+        SELECT
+        p.id,
+        p.title,
+        p.thumbnail,
+        p.like_count,
+        p.created_at
+        FROM Portfolio p
+        <where>
+            p.user_pid = #{userPid}
+
+            <if test="keyword != null and keyword != ''">
+                AND p.title LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+
+            <if test="tags != null and tags.size() > 0">
+                <foreach item="tag" collection="tags" open="AND (" separator="AND" close=")">
+                    EXISTS (
+                    SELECT 1 FROM Portfolio_Tags pt
+                    WHERE pt.portfolio_id = p.id
+                    AND pt.tag = #{tag}
+                    )
+                </foreach>
+            </if>
+        </where>
+        ORDER BY p.created_at DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <!-- 특정 유저 작성 포트폴리오 totalCount 반환 -->
+    <select id="getPersonalPortfolioTotalCount" parameterType="map" resultType="int">
+        SELECT COUNT(*)
+        FROM Portfolio p
+        <where>
+            p.user_pid = #{userPid}
+
+            <if test="keyword != null and keyword != ''">
+                AND p.title LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+
+            <if test="tags != null and !tags.isEmpty()">
+                <foreach item="tag" collection="tags" open="AND (" separator="AND" close=")">
+                    EXISTS (
+                    SELECT 1
+                    FROM Portfolio_Tags pt
+                    WHERE pt.portfolio_id = p.id
+                    AND pt.tag = #{tag}
+                    )
+                </foreach>
+            </if>
+        </where>
+    </select>
+
 
     <!-- 좋아요 여부 확인 -->
     <select id="checkUserLike" resultType="boolean">

@@ -1,7 +1,9 @@
 package co.kr.myportfolio.mapper;
 
+import co.kr.myportfolio.dto.PersonalPortfolioDTO;
 import co.kr.myportfolio.dto.PortfolioCardDTO;
 import co.kr.myportfolio.dto.PortfolioResponseDTO;
+import co.kr.myportfolio.dto.TagDTO;
 import co.kr.myportfolio.vo.Portfolio;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -38,4 +40,10 @@ public interface PortfolioMapper {
     int getPortfolioTotalCount(Map<String, Object> params);
 
     int getLikedPortfolioTotalCount(Map<String, Object> params);
+
+    List<TagDTO> getUsersTags(int userPid);
+
+    List<PersonalPortfolioDTO> getPersonalPortfolio(Map<String, Object> params);
+
+    int getPersonalPortfolioTotalCount(Map<String, Object> params);
 }
