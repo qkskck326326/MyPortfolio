@@ -270,12 +270,13 @@
             });
         }
 
-        // 닉네임 클릭 시 사용자 페이지 이동 준비 (현재는 콘솔 출력만)
+        // 닉네임 클릭 시 해당 사용자 페이지 이동
         $(document).on('click', '.nickname', function (e) {
             e.preventDefault();
             e.stopPropagation();
-            const nickname = $(this).data('user');
-            console.log(`작성자 클릭: \${nickname}`);
+            const userPid = $(this).data('user_pid');
+            console.log(`작성자 아이디 클릭:` + userPid);
+            location.href = "${pageContext.request.contextPath}/personal/" + userPid;
         });
 
         // 첫 페이지 로딩
