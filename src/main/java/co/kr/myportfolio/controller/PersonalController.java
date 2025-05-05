@@ -19,9 +19,9 @@ public class PersonalController {
     private PortfolioService portfolioService;
 
     // 특정개인 페이지로
-    @GetMapping("/{userId}")
-    public String goPersonalPage(@PathVariable int userId, Model model) {
-        model.addAttribute("userPid", userId);
+    @GetMapping("/{userPid}")
+    public String goPersonalPage(@PathVariable int userPid, Model model) {
+        model.addAttribute("userPid", userPid);
         return "personalPage";
     }
 
