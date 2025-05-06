@@ -119,6 +119,8 @@
             if (name === '전체') {
                 $('#userTagsList li').removeClass('tag-selected');
                 userTags = [];
+                keyword = "";
+                document.getElementById("searchKeyword").value = "";
                 $(this).addClass('tag-selected');
             } else {
                 $('#userTagsList li:first').removeClass('tag-selected');
