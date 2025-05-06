@@ -68,7 +68,7 @@
                p.id,
                p.user_pid,
                p.like_count,
-               p.user_nickname,
+               u.nickname                            AS user_nickname,
                p.thumbnail,
                p.title,
                p.content,
@@ -80,19 +80,21 @@
                  LEFT JOIN Portfolio_Tags pt ON p.id = pt.portfolio_id
                  LEFT JOIN User_Portfolio_Like upl
                            ON upl.portfolio_id = p.id AND upl.user_pid = #{userPid}
+                 LEFT JOIN User u ON p.user_pid = u.user_pid
         WHERE p.id = #{portfolioId}
     </select>
 
     <!--포트폴리오 카드 리스트 반환-->
     <select id="getPortfolioCardList" resultType="PortfolioCardDTO">
-        SELECT p.id            AS portfolioId,
-               p.user_pid      AS userPid,
-               p.like_count    AS likeCount,
-               p.thumbnail     AS thumbnail,
-               p.title         AS portfolioTitle,
-               p.user_nickname AS userNickname,
-               p.created_at    AS createdAt
+        SELECT p.id         AS portfolioId,
+               p.user_pid   AS userPid,
+               p.like_count AS likeCount,
+               p.thumbnail  AS thumbnail,
+               p.title      AS portfolioTitle,
+               u.nickname   AS userNickname,
+               p.created_at AS createdAt
         FROM Portfolio p
+                 LEFT JOIN User u ON p.user_pid = u.user_pid
         ORDER BY p.created_at DESC
     </select>
 
@@ -125,9 +127,10 @@
         p.like_count AS likeCount,
         p.thumbnail AS thumbnail,
         p.title AS portfolioTitle,
-        p.user_nickname AS userNickname,
+        u.nickname AS userNickname,
         p.created_at AS createdAt
         FROM Portfolio p
+        LEFT JOIN User u ON p.user_pid = u.user_pid
         WHERE 1=1
         <if test="tags != null and !tags.isEmpty()">
             <foreach item="tag" collection="tags" open="AND (" separator="AND" close=")">
@@ -161,7 +164,6 @@
         WHERE user_pid = #{userPid}
     </select>
 
-
     <!--무한스크롤 - 좋아요 표시한 게시글) 카드 리스트 반환 + 정렬기준-->
     <select id="getLikedPortfolioCardListWithSortBy" parameterType="map" resultType="PortfolioCardDTO">
         SELECT
@@ -170,11 +172,11 @@
         p.like_count AS likeCount,
         p.thumbnail AS thumbnail,
         p.title AS portfolioTitle,
-        p.user_nickname AS userNickname,
+        u.nickname AS userNickname,
         p.created_at AS createdAt
         FROM Portfolio p
-        INNER JOIN User_Portfolio_Like upl
-        ON p.id = upl.portfolio_id
+        INNER JOIN User_Portfolio_Like upl ON p.id = upl.portfolio_id
+        LEFT JOIN User u ON p.user_pid = u.user_pid
         WHERE upl.user_pid = #{userPid}
         ORDER BY
         <choose>
