@@ -67,9 +67,12 @@
             right: 40px;
             display: flex;
             flex-direction: column;
-            gap: 16px;
-            z-index: 999;
             align-items: center;
+            z-index: 999;
+
+            background-color: #e5e7eb;
+            border-radius: 32px;
+            padding: 15px 10px;
         }
         .floating-nav button {
             width: 50px;
@@ -146,17 +149,17 @@
         <c:choose>
             <c:when test="${is_like}">
                 <button id="likeBtn" title="좋아요" style="background-color: #ef4444;">
-                    <i class="fas fa-thumbs-up"></i>
+                    <i class="fas fa-heart"></i></i>
                 </button>
             </c:when>
             <c:otherwise>
                 <button id="likeBtn" title="좋아요" style="background-color: #1d4ed8;">
-                    <i class="far fa-thumbs-up"></i>
+                    <i class="far fa-heart"></i>
                 </button>
             </c:otherwise>
         </c:choose>
         <p id="likeCount">${portfolio.likeCount}</p>
-        <button title="복사">
+        <button id="copyBtn" title="복사">
             <i class="fas fa-copy"></i>
         </button>
     </div>
@@ -241,12 +244,12 @@
                     if (data.liked) {
                         // 좋아요 상태로 UI 변경
                         btn.style.backgroundColor = "#ef4444";
-                        icon.className = "fas fa-thumbs-up";
+                        icon.className = "fas fa-heart";
                         currentLikeCount += 1;
                     } else {
                         // 좋아요 취소 상태로 UI 변경
                         btn.style.backgroundColor = "#1d4ed8";
-                        icon.className = "far fa-thumbs-up";
+                        icon.className = "far fa-heart";
                         currentLikeCount -= 1;
                     }
 
@@ -289,6 +292,19 @@
                     tagEl.classList.remove("selected-tag");
                 }
             });
+        });
+
+        document.getElementById("copyBtn").addEventListener("click", function () {
+            const currentUrl = window.location.href;
+
+            navigator.clipboard.writeText(currentUrl)
+                .then(() => {
+                    alert("링크가 복사되었습니다.");
+                })
+                .catch(err => {
+                    alert("복사에 실패했습니다.");
+                    console.error("복사 실패: ", err);
+                });
         });
     </script>
 </div>
