@@ -10,8 +10,8 @@
     </insert>
 
     <!-- 사용자 조회 (PID로 검색) -->
-    <select id="getUserById" resultType="User" parameterType="int">
-        SELECT * FROM User WHERE user_id = #{user_id};
+    <select id="getUserByPid" resultType="User" parameterType="int">
+        SELECT * FROM User WHERE user_pid = #{user_pid};
     </select>
 
     <!-- 사용자 조회 (user_id로 검색) -->

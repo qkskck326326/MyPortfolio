@@ -26,9 +26,9 @@ public class UserController {
     private UserService userService;
 
     // 페이지 이동 - 유저 디테일
-    @GetMapping("/{id}")
-    public String getUser(@PathVariable int id, Model model) {
-        User user = userService.getUserById(id);
+    @GetMapping("/{pid}")
+    public String getUser(@PathVariable int pid, Model model) {
+        User user = userService.getUserByPid(pid);
         model.addAttribute("user", user);
         return "userDetail"; // userDetail.jsp로 연결
     }
@@ -141,7 +141,7 @@ public class UserController {
             model.addAttribute("errorMessage", "로그인이 필요합니다.");
             return new UserResponseDTO();
         }else {
-            User user = userService.getUserById(userPid);
+            User user = userService.getUserByPid(userPid);
             return UserResponseDTO.from(user);
         }
     }

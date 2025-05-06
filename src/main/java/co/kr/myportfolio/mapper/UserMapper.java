@@ -13,7 +13,7 @@ public interface UserMapper {
     void insertUser(User user);
     
     // id로 유저 찾기
-    User getUserById(int id);
+    User getUserByPid(int pid);
     
     // UserId로 유저 찾기
     User getUserByUserId(String userId);

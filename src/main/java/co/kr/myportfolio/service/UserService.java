@@ -27,8 +27,9 @@ public class UserService {
         return "회원가입이 완료되었습니다.";
     }
 
-    public User getUserById(int id) {
-        return userMapper.getUserById(id);
+    // 유저 자신 정보 불러오기
+    public User getUserByPid(int pid) {
+        return userMapper.getUserByPid(pid);
     }
 
     public User getUserByUserId(String userId) {

@@ -22,7 +22,7 @@ public class PersonalService {
     // API - 특정 유저 포트폴리오 모든 테그 및 소개 반환
     @Transactional
     public UserInfoAndTagsDTO goUserInfoAndTags(int userPid) {
-        User user = userService.getUserById(userPid);
+        User user = userService.getUserByPid(userPid);
         List<TagDTO> tags = portfolioService.getUsersTags(userPid);
         return  UserInfoAndTagsDTO.from(user, tags);
     }
