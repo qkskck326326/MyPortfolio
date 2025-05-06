@@ -71,10 +71,12 @@
       <div>
         <label class="form-label">아이디</label>
         <div class="input-group">
-          <input type="text" class="form-control" id="userId" required isValid="false">
+          <input type="text" class="form-control" id="userId" required
+                 isValid="false" minlength="5" maxlength="16"
+                 pattern="[a-zA-Z0-9]+">
           <button type="button" id="checkUserIdBtn" class="btn btn-outline-secondary btn-sm">중복 확인</button>
         </div>
-        <p id="userIdMessage" class="form-text text-danger"></p>
+        <p id="userIdMessage" class="form-text"></p>
       </div>
 
       <div>
@@ -83,18 +85,21 @@
           <input type="text" class="form-control" id="nickname" required isValid="false">
           <button type="button" id="checkNicknameBtn" class="btn btn-outline-secondary btn-sm">중복 확인</button>
         </div>
-        <p id="nicknameMessage" class="form-text text-danger"></p>
+        <p id="nicknameMessage" class="form-text"></p>
       </div>
 
       <div>
         <label class="form-label">비밀번호</label>
-        <input type="password" class="form-control" id="password" required>
+        <input type="password" class="form-control" id="password" required
+               minlength="8" maxlength="20"
+               pattern="(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}">
         <p id="passwordMessage" class="form-text"></p>
       </div>
 
       <div>
         <label class="form-label">비밀번호 확인</label>
         <input type="password" class="form-control" id="passwordCheck" required>
+        <p id="passwordCheckMessage" class="form-text"></p>
       </div>
 
       <div>
@@ -218,12 +223,20 @@
         contentType: "application/json",
         data: JSON.stringify({ nickname: nickname }),
         success: function(response) {
-          if (response) {
-            $("#nicknameMessage").text("이미 사용 중인 닉네임입니다.").css("color", "red");
-            $("#nickname").attr("isValid", "false");
-          } else {
-            $("#nicknameMessage").text("사용 가능한 닉네임입니다.").css("color", "green");
+          if (!response) {
+            // 사용 가능할 때
+            $("#nicknameMessage")
+                    .removeClass("text-danger text-success")  // 모두 제거
+                    .addClass("text-success")
+                    .text("사용 가능한 닉네임입니다.");
             $("#nickname").attr("isValid", "true");
+          } else {
+            // 중복일 때
+            $("#nicknameMessage")
+                    .removeClass("text-success text-danger")
+                    .addClass("text-danger")
+                    .text("이미 사용 중인 닉네임입니다.");
+            $("#nickname").attr("isValid", "false");
           }
         },
         error: function() {
@@ -232,9 +245,20 @@
       });
     });
 
+    // 아이디 유효성 검사
     $("#userId").on("input", function() {
+      const val = $(this).val();
+      const regex = /^[a-zA-Z0-9]{5,16}$/;
+      let userIdMessage = $("#userIdMessage");
+
       $("#userId").attr("isValid", "false");
-      $("#userIdMessage").text("");
+      userIdMessage.text("");
+
+      if (!regex.test(val)) {
+        userIdMessage.text("아이디는 영문/숫자 5~16자로 입력하세요.").css("color", "red");
+      } else {
+        userIdMessage.text("유효한 아이디 입니다!").css("color", "green");
+      }
     });
 
     $("#checkUserIdBtn").click(function() {
@@ -263,10 +287,22 @@
       });
     });
 
-    $("#password, #passwordCheck").on("input", function() {
+    $("#password").on("input", function () {
+      const val = $(this).val();
+      const regex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&]).{8,20}$/;
+      const passwordMessage = $("#passwordMessage")
+
+      if (!regex.test(val)) {
+        passwordMessage.text("영문, 숫자, 특수문자를 포함한 8~20자 비밀번호를 입력하세요.").css("color", "red");
+      }else{
+        passwordMessage.text("유효한 비밀번호 입니다!").css("color", "green");
+      }
+    });
+
+    $("#passwordCheck").on("input", function() {
       let password = $("#password").val();
       let passwordCheck = $("#passwordCheck").val();
-      let messageElement = $("#passwordMessage");
+      let messageElement = $("#passwordCheckMessage");
 
       if (password !== passwordCheck) {
         messageElement.text("비밀번호가 일치하지 않습니다.").css("color", "red");
@@ -274,6 +310,7 @@
         messageElement.text("비밀번호가 일치합니다!").css("color", "green");
       }
     });
+
   });
 </script>
 
