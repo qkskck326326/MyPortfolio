@@ -28,7 +28,17 @@ public class PortfolioController {
     
     // 포트폴리오 등록 페이지 이동
     @GetMapping("/new")
-    public String newPortfolio() {
+    public String newPortfolio(HttpSession session , Model model) {
+        // 세션에서 유저 정보 가져오기
+        int userPid = (int) session.getAttribute("user_pid");
+        String userNickname = (String) session.getAttribute("user_nickname");
+
+        if (userPid == 0 || userNickname == null) {
+            // 세션 정보 없을시 로그인 페이지로
+            model.addAttribute("errorMessage", "로그인이 필요합니다!");
+            return "redirect:/login";
+        }
+
         return "portfolioForm";
     }
     
