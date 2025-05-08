@@ -123,7 +123,7 @@
 <script>
     let thumbnail = null;
     let portfolioDTO = null;
-    console.log(portfolioDTO)
+    let portfolio = null;
 
     const portfolioDataElement = document.getElementById("portfolio-data");
     if (portfolioDataElement) {
@@ -136,7 +136,6 @@
 
     document.addEventListener("DOMContentLoaded", function () {
         const button = document.querySelector('.button-container button');
-        console.log(button);
         const tagInput = document.getElementById('tag-input');
         const tagBox = document.getElementById('tag-box');
 
@@ -148,7 +147,8 @@
 
         // portfolio 존재시 대입
         if (portfolioDTO) {
-            const portfolio = portfolioDTO.portfolio;
+            portfolio = portfolioDTO.portfolio;
+            console.log("포트폴리오 id : " + portfolio.id)
             document.getElementById('title').value = portfolio.title;
             editor.setMarkdown(portfolio.content);
 
@@ -220,25 +220,49 @@
                 .map(t => t.trim())
                 .filter(t => t.length > 0); // 공백 테그 제거
 
-            $.ajax({
-                type: "POST",
-                url: "${pageContext.request.contextPath}/portfolio/post",
-                contentType: "application/json",
-                data: JSON.stringify({
-                    title: title,
-                    content: content,
-                    thumbnail : thumbnail,
-                    tags: tagList
-                }),
-                success: function (response) {
-                    alert(response.message); // 서버에서 보낸 메시지 출력
-                    window.location.href = "${pageContext.request.contextPath}/portfolio/" + response.portfolioId; // 포트폴리오 상세 페이지로 이동
-                },
-                error: function (xhr, status, error) {
-                    console.log(xhr.responseText)
-                    alert("등록 중 오류가 발생했습니다");
-                }
-            });
+            if (portfolioDTO){
+                $.ajax({
+                    type: "POST",
+                    url: "${pageContext.request.contextPath}/portfolio/update",
+                    contentType: "application/json",
+                    data: JSON.stringify({
+                        portfolioId : portfolio.id,
+                        title: title,
+                        content: content,
+                        thumbnail : thumbnail,
+                        tags: tagList
+                    }),
+                    success: function (response) {
+                        alert(response.message); // 서버에서 보낸 메시지 출력
+                        window.location.href = "${pageContext.request.contextPath}/portfolio/" + response.portfolioId; // 포트폴리오 상세 페이지로 이동
+                    },
+                    error: function (xhr, status, error) {
+                        console.log(xhr.responseText)
+                        alert("등록 중 오류가 발생했습니다");
+                    }
+                });
+            }else{
+                $.ajax({
+                    type: "POST",
+                    url: "${pageContext.request.contextPath}/portfolio/post",
+                    contentType: "application/json",
+                    data: JSON.stringify({
+                        title: title,
+                        content: content,
+                        thumbnail : thumbnail,
+                        tags: tagList
+                    }),
+                    success: function (response) {
+                        alert(response.message); // 서버에서 보낸 메시지 출력
+                        window.location.href = "${pageContext.request.contextPath}/portfolio/" + response.portfolioId; // 포트폴리오 상세 페이지로 이동
+                    },
+                    error: function (xhr, status, error) {
+                        console.log(xhr.responseText)
+                        alert("등록 중 오류가 발생했습니다");
+                    }
+                });
+            }
+
         }
     });
 
