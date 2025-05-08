@@ -7,6 +7,7 @@ import co.kr.myportfolio.dto.SearchWithoutIndexDTO;
 import co.kr.myportfolio.service.PortfolioService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.ibatis.annotations.Delete;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -110,6 +111,23 @@ public class PortfolioController {
         Map<String, Object> response = new HashMap<>();
         response.put("portfolioId", portfolioRequestDTO.getPortfolioId());
         response.put("message", "프로젝트가 성공적으로 수정되었습니다!");
+        return ResponseEntity.ok(response);
+    }
+
+    // 포트폴리오 삭제
+    @DeleteMapping("/delete/{portfolioId}")
+    public ResponseEntity<?> deletePortfolio(@PathVariable Integer portfolioId, HttpSession session) {
+        // 세션에서 유저 정보 가져오기
+        int userPid = (int) session.getAttribute("user_pid");
+
+        if (userPid == 0) {
+            return ResponseEntity.badRequest().body("로그인이 필요합니다.");
+        }
+
+        portfolioService.deletePortfolio(portfolioId);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "프로젝트가 성공적으로 삭제되었습니다!");
         return ResponseEntity.ok(response);
     }
 

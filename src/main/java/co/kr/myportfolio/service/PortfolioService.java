@@ -122,4 +122,8 @@ public class PortfolioService {
     public int getPersonalPortfolioTotalCount(Map<String, Object> params) {
         return portfolioMapper.getPersonalPortfolioTotalCount(params);
     }
+
+    public void deletePortfolio(Integer portfolioId) {
+        portfolioMapper.deletePortfolio(portfolioId);
+    }
 }

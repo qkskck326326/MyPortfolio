@@ -46,4 +46,6 @@ public interface PortfolioMapper {
     List<PersonalPortfolioDTO> getPersonalPortfolio(Map<String, Object> params);
 
     int getPersonalPortfolioTotalCount(Map<String, Object> params);
+
+    void deletePortfolio(Integer portfolioId);
 }
