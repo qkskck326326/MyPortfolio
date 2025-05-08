@@ -101,6 +101,10 @@ public class PortfolioController {
             return ResponseEntity.badRequest().body("로그인이 필요합니다.");
         }
 
+        // 세션에서 가져온 userPid & nickname 를 DTO에 설정
+        portfolioRequestDTO.setUserPid(userPid);
+        portfolioRequestDTO.setUserNickname(userNickname);
+
         portfolioService.updatePortfolio(portfolioRequestDTO);
 
         Map<String, Object> response = new HashMap<>();
