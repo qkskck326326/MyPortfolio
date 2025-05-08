@@ -205,7 +205,7 @@
                     })
                     .then(result => {
                         alert("삭제되었습니다.");
-                        window.location.href = `${pageContext.request.contextPath}/portfolio/list`;
+                        window.location.href = `${pageContext.request.contextPath}/`;
                     })
                     .catch(error => {
                         console.error(error);
