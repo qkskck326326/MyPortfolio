@@ -48,4 +48,6 @@ public interface PortfolioMapper {
     int getPersonalPortfolioTotalCount(Map<String, Object> params);
 
     void deletePortfolio(Integer portfolioId);
+
+    int getPortfolioWriterPid(int portfolioId);
 }

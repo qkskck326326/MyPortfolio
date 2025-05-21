@@ -77,6 +77,11 @@ public class PortfolioService {
         return portfolioMapper.getPortfolioAndTag(portfolioId, userPid);
     }
 
+    // 특정 포트폴리오 작성자 ID 불러오기
+    public int getPortfolioWriterPid(int portfolioId) {
+        return portfolioMapper.getPortfolioWriterPid(portfolioId);
+    }
+
     public List<PortfolioCardDTO> getPortfolioCardList() {
         return portfolioMapper.getPortfolioCardList();
     }
