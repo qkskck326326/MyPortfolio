@@ -29,14 +29,13 @@ public class PortfolioController {
     
     // 포트폴리오 등록 페이지 이동
     @GetMapping("/new")
-    public String newPortfolio(HttpSession session , Model model) {
-        // 세션에서 유저 정보 가져오기
-        int userPid = (int) session.getAttribute("user_pid");
+    public String newPortfolio(HttpSession session , RedirectAttributes redirectAttributes) {
+        Object userPidObj = session.getAttribute("user_pid");
         String userNickname = (String) session.getAttribute("user_nickname");
 
-        if (userPid == 0 || userNickname == null) {
+        if (userPidObj == null || userNickname == null) {
             // 세션 정보 없을시 로그인 페이지로
-            model.addAttribute("errorMessage", "로그인이 필요합니다!");
+            redirectAttributes.addFlashAttribute("errorMessage", "로그인이 필요합니다!");
             return "redirect:/login";
         }
 
@@ -45,14 +44,20 @@ public class PortfolioController {
     
     // 포트폴리오 수정 페이지 이동
     @GetMapping("/update/{portfolioId}")
-    public String updatePortfolio(@PathVariable Integer portfolioId, Model model, HttpSession session) throws JsonProcessingException {
+    public String updatePortfolio(@PathVariable Integer portfolioId, Model model, HttpSession session ,
+                                  RedirectAttributes redirectAttributes) throws JsonProcessingException {
         PortfolioResponseDTO portfolioDTO = portfolioService.getPortfolio(portfolioId, 0);
 
         // 세션에서 유저 정보 가져오기
-        int userPid = (int) session.getAttribute("user_pid");
+        Object userPidObj = session.getAttribute("user_pid");
+        if (userPidObj == null) {
+            redirectAttributes.addFlashAttribute("message", "로그인이 필요합니다.");
+            return "redirect:/login";
+        }
+        int userPid = (int) userPidObj;
 
         if (userPid != portfolioDTO.getPortfolio().getUserPid()) {
-            model.addAttribute("message", "권한이 없습니다.");
+            redirectAttributes.addFlashAttribute("message", "권한이 없습니다.");
             return "redirect:/portfolio/" + portfolioId;
         }
 
@@ -70,12 +75,14 @@ public class PortfolioController {
     public ResponseEntity<?> postPortfolio(@RequestBody PortfolioRequestDTO portfolioRequestDTO,
                                                              HttpSession session) {
         // 세션에서 유저 정보 가져오기
-        int userPid = (int) session.getAttribute("user_pid");
+        Object userPidObj = session.getAttribute("user_pid");
         String userNickname = (String) session.getAttribute("user_nickname");
 
-        if (userPid == 0 || userNickname == null) {
-            return ResponseEntity.badRequest().body("로그인이 필요합니다.");
+        if (userPidObj == null || userNickname == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("message", "로그인이 필요합니다."));
         }
+        int userPid = (int) userPidObj;
 
         // 세션에서 가져온 userPid & nickname 를 DTO에 설정
         portfolioRequestDTO.setUserPid(userPid);
@@ -95,11 +102,18 @@ public class PortfolioController {
     public ResponseEntity<?> updatePortfolio(@RequestBody PortfolioRequestDTO portfolioRequestDTO,
                                              HttpSession session) {
         // 세션에서 유저 정보 가져오기
-        int userPid = (int) session.getAttribute("user_pid");
+        Object userPidObj = session.getAttribute("user_pid");
         String userNickname = (String) session.getAttribute("user_nickname");
 
-        if (userPid == 0 || userNickname == null) {
-            return ResponseEntity.badRequest().body("로그인이 필요합니다.");
+        if (userPidObj == null || userNickname == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("message", "로그인이 필요합니다."));
+        }
+        int userPid = (int) userPidObj;
+
+        if (userPid != portfolioRequestDTO.getUserPid()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("message", "권한이 없습니다."));
         }
 
         // 세션에서 가져온 userPid & nickname 를 DTO에 설정
@@ -117,11 +131,17 @@ public class PortfolioController {
     // 포트폴리오 삭제
     @DeleteMapping("/delete/{portfolioId}")
     public ResponseEntity<?> deletePortfolio(@PathVariable Integer portfolioId, HttpSession session) {
-        // 세션에서 유저 정보 가져오기
-        int userPid = (int) session.getAttribute("user_pid");
+        Object userPidObj = session.getAttribute("user_pid");
 
-        if (userPid == 0) {
-            return ResponseEntity.badRequest().body("로그인이 필요합니다.");
+        if (userPidObj == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("message", "로그인이 필요합니다."));
+        }
+        int userPid = (int) userPidObj;
+
+        if (userPid != portfolioService.getPortfolioWriterPid(portfolioId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("message", "권한이 없습니다."));
         }
 
         portfolioService.deletePortfolio(portfolioId);
