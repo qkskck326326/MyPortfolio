@@ -122,6 +122,11 @@
 </head>
 <body>
 <jsp:include page="/WEB-INF/views/common/header.jsp" />
+<c:if test="${not empty message}">
+    <script>
+        alert("${message}");
+    </script>
+</c:if>
 <div class="portfolio-container">
     <h1>${portfolio.title}</h1>
     <p class="nickname">작성자 : ${portfolio.userNickname}</p>
@@ -197,15 +202,18 @@
                         "Content-Type": "application/json"
                     }
                 })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error("삭제 실패");
-                        }
-                        return response.text();
-                    })
+                    .then(response => response.json()
+                        .then(data => ({ status: response.status, ok: response.ok, body: data }))
+                    ) // 응답과 바디 동시 처리
                     .then(result => {
-                        alert("삭제되었습니다.");
-                        window.location.href = `${pageContext.request.contextPath}/`;
+                        if (result.ok) {
+                            // 성공: 메시지가 있으면 메시지 출력, 없으면 기본 메시지
+                            alert(result.body.message || "삭제되었습니다.");
+                            window.location.href = `${pageContext.request.contextPath}/`;
+                        } else {
+                            // 실패: 서버에서 메시지가 오면 출력, 아니면 기본 에러
+                            alert(result.body && result.body.message ? result.body.message : "삭제 중 오류가 발생했습니다.");
+                        }
                     })
                     .catch(error => {
                         console.error(error);
