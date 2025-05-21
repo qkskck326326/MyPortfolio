@@ -55,6 +55,29 @@ CI/CD를 구축하여 빌드 및 배포를 자동화 하였습니다.
 GitHub Actions를 활용한 CI/CD 파이프라인을 구축하여,  
 코드가 저장소에 Push될 때마다 Docker 기반 자동 빌드 및 배포가 실행됩니다.
 
+자동빌드 및 배포 흐름 : 
+```
+[로컬 개발환경]
+    ↓ (코드 개발/테스트 후 Git Push)
+[GitHub 저장소(main 브랜치)]
+    ↓ (Push 이벤트 발생)
+[GitHub Actions]
+    ↓ (배포 워크플로우 자동 실행)
+        - 리포지토리 checkout
+        - SSH 프라이빗 키 등록 (GitHub Secrets)
+        - 원격 서버(OCI VM) SSH 접속
+        - 서버에서 코드 최신화(git pull)
+        - 불필요한 파일 정리(git reset/clean)
+        - 기존 컨테이너 종료(docker-compose down)
+        - 컨테이너 재빌드 및 실행(docker-compose up -d --build)
+    ↓
+[OCI Instance (클라우드 서버)]
+    ↓ (서버 내부에서 컨테이너가 실행)
+[Nginx (HTTPS/Reverse Proxy)]
+    ↓ (외부 HTTPS 트래픽을 컨테이너로 프록시)
+[사용자 브라우저]
+```
+
 ### 도메인 연결 + https 적용
 
 Nginx 리버스 프록시 설정을 통해 외부 요청을 안전하게 백엔드로 라우팅하며,  
