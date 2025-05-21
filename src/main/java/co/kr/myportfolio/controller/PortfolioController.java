@@ -111,7 +111,7 @@ public class PortfolioController {
         }
         int userPid = (int) userPidObj;
 
-        if (userPid != portfolioRequestDTO.getUserPid()) {
+        if (userPid != portfolioService.getPortfolioWriterPid(portfolioRequestDTO.getPortfolioId())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(Map.of("message", "권한이 없습니다."));
         }
